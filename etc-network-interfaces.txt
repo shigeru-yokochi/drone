@@ -1,0 +1,12 @@
+/etc/network/interfaces
+
+wlan0
+88:57:ee:9a:a4:78
+192.168.0.201
+
+
+
+wlan0
+cc:e1:d5:40:68:9c
+192.168.0.202
+
