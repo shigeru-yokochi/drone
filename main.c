@@ -387,6 +387,17 @@ static void Naze32_Main_Loop(void)
 	PCA9685_pwmWrite(NAZE32_ARM, NAZE32_ARM_OFF);
 	sleep(1);	
 
+
+
+	PCA9685_pwmWrite(NAZE32_ROLL	, 0);
+	PCA9685_pwmWrite(NAZE32_PITCH	, 0);
+	PCA9685_pwmWrite(NAZE32_YAW		, 0);
+	PCA9685_pwmWrite(NAZE32_THROTTLE, 0);
+	PCA9685_pwmWrite(NAZE32_ARM		, 0);
+	PCA9685_pwmWrite(NAZE32_BARO	, 0);
+	sleep(1);
+	sleep(5);
+
 }
 /********************************************************************************
 *	ループ
