@@ -389,12 +389,15 @@ static void Naze32_Main_Loop(void)
 
 
 
-	PCA9685_pwmWrite(NAZE32_ROLL	, 1000);
-	PCA9685_pwmWrite(NAZE32_PITCH	, 1100);
-	PCA9685_pwmWrite(NAZE32_YAW		, 1200);
-	PCA9685_pwmWrite(NAZE32_THROTTLE, 1300);
-	PCA9685_pwmWrite(NAZE32_ARM		, 1400);
+	PCA9685_pwmWrite(NAZE32_ROLL	, 1000); //throttle
+	PCA9685_pwmWrite(NAZE32_PITCH	, 1100); //roll
+	PCA9685_pwmWrite(NAZE32_YAW		, 1200); //pitch
+	PCA9685_pwmWrite(NAZE32_THROTTLE, 1300); //yaw
+	PCA9685_pwmWrite(NAZE32_ARM		, 1400); //aux2
 	PCA9685_pwmWrite(NAZE32_BARO	, 1500); //aux3
+	PCA9685_pwmWrite(6				, 1600); //
+	PCA9685_pwmWrite(7				, 1700); //
+
 	sleep(1);
 	sleep(5);
 
