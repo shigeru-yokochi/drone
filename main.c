@@ -372,7 +372,8 @@ static void Naze32_Main_Loop(void)
 //	PCA9685_pwmWrite(NAZE32_BARO, NAZE32_BARO_OFF);
 
 
-
+	printf("--- throttle neutral\n");
+	PCA9685_pwmWrite(NAZE32_THROTTLE, NAZE32_NEUTRAL_THROTTLE);
 
 	printf("--- arming stop!\n");
 	PCA9685_pwmWrite(NAZE32_ARM, NAZE32_ARM_OFF);
