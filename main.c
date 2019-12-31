@@ -94,10 +94,10 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define	NAZE32_BARO_ON			1563
 #define NAZE32_ROLL				0
 #define NAZE32_PITCH			1
-#define NAZE32_YAW				3
-#define NAZE32_THROTTLE			2
+#define NAZE32_YAW				2
+#define NAZE32_THROTTLE			3
 #define NAZE32_ARM				4
-#define NAZE32_BARO				15
+#define NAZE32_BARO				5
 
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高
