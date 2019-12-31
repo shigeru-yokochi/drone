@@ -85,7 +85,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 //#define PWM_POWER	0.2
 
 //NAZE32
-#define	NAZE32_NEUTRAL			1563
+//#define	NAZE32_NEUTRAL			1563
+#define	NAZE32_NEUTRAL			1200
 #define	NAZE32_NEUTRAL_THROTTLE	950
 #define	NAZE32_ARM_OFF			1000
 #define	NAZE32_ARM_ON			1563
