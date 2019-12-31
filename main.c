@@ -238,7 +238,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 	sleep(1);
 
 	printf("--- arming start\n");
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO, BETAFPV_F4_2S_AIO_ARM_ON);
+	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM, BETAFPV_F4_2S_AIO_ARM_ON);
 
 	memset(&m_AttitudeData, 0, sizeof(m_AttitudeData));//初期化
 
