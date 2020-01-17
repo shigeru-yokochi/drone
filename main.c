@@ -99,7 +99,7 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define NAZE32_BARO				5
 
 //BETAFPV F4 2S AIO Brushless No Rx
-#define BETAFPV_F4_2S_AIO_ROLL		0
+#define BETAFPV_F4_2S_AIO_ROLL		5
 #define BETAFPV_F4_2S_AIO_PITCH		1
 #define BETAFPV_F4_2S_AIO_THROTTLE	2
 #define BETAFPV_F4_2S_AIO_YAW		3
