@@ -113,15 +113,13 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define	BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE	950
 
 
-
-
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高
 #define MAXIMUM_GROUND_CLEARANCE	400	//最大地上高(できるだけ高くするmax500目標)
 
-#define DEBUG_MAINLOOP_TO			5	//デバッグ用メインループタイムアウト指定(sec)
+#define DEBUG_MAINLOOP_TO			3	//デバッグ用メインループタイムアウト指定(sec)
 #define FLIGHT_TIME					2	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
 #define OFFSET_POWER				350
-#define LANDING_POWER				450
+#define LANDING_POWER				250
 
 
 //姿勢制御用データ格納用
