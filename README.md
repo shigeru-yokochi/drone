@@ -15,4 +15,6 @@ Raspberry Pi Zero で自律飛行ドローン作成
 
 https://qiita.com/shigeru-yokochi/items/0a0a4f06cd8dec553159
 
+https://www.yokochi.jp/categories/drone/
+
 https://www.youtube.com/watch?v=y1wnsGAwrUc
