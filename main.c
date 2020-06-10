@@ -344,6 +344,8 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_AUX1		, 1200);	//arm
 	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_AUX2		, 1100);
 	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_AUX3		, 1000);
+	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_AUX4		, 900);
+
 	sleep(5);
 
 }
