@@ -99,7 +99,7 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define NAZE32_BARO				5
 
 //BETAFPV F4 2S AIO Brushless No Rx
-#define BETAFPV_F4_2S_AIO_ROLL		0
+#define BETAFPV_F4_2S_AIO_xxxxxx	0	//PCA9685ポート不具合のため未使用
 #define BETAFPV_F4_2S_AIO_PITCH		1
 #define BETAFPV_F4_2S_AIO_THROTTLE	2
 #define BETAFPV_F4_2S_AIO_YAW		3
@@ -108,6 +108,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define BETAFPV_F4_2S_AIO_AUX2		5
 #define BETAFPV_F4_2S_AIO_AUX3		6
 #define BETAFPV_F4_2S_AIO_AUX4		7
+#define BETAFPV_F4_2S_AIO_ROLL		7	//aux4
+
 #define BETAFPV_F4_2S_AIO_ARM_OFF	1000
 #define BETAFPV_F4_2S_AIO_ARM_ON	1500
 #define	BETAFPV_F4_2S_AIO_NEUTRAL			1519
