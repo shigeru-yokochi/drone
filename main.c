@@ -1110,12 +1110,12 @@ static int I2c_device_init(void)
 	}
 	printf("--- VL53L0X_init() OK\n");
 
-	if(MPU6050_init() != 0){						//ジャイロ加速度センサ
-		printf("*** MPU6050_init()err\n");
-		VL53L0X_close();
-		return -1;
-	}
-	printf("--- MPU6050_init() OK\n");
+//	if(MPU6050_init() != 0){						//ジャイロ加速度センサ
+//		printf("*** MPU6050_init()err\n");
+//		VL53L0X_close();
+//		return -1;
+//	}
+//	printf("--- MPU6050_init() OK\n");
 
 	if(PCA9685_init() != 0){					//PWMドライバ
 		printf("*** PCA9685_init()err\n");
@@ -1124,12 +1124,12 @@ static int I2c_device_init(void)
 	}
 	printf("--- PCA9685_init() OK\n");
 
-	if (HMC5883L_init() == 1) {					//コンパス
-		printf("*** HMC5883L_init() error.\n");
-		VL53L0X_close();
-		return -1;
-	}
-	printf("--- HMC5883L_init() OK\n");
+//	if (HMC5883L_init() == 1) {					//コンパス
+//		printf("*** HMC5883L_init() error.\n");
+//		VL53L0X_close();
+//		return -1;
+//	}
+//	printf("--- HMC5883L_init() OK\n");
 
 	return 0;
 }
