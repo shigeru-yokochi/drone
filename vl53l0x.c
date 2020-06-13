@@ -48,7 +48,7 @@ VL53L0X_Error VL53L0X_init(void)
     // Initialize Comms
     pinMode(20,OUTPUT);  
     digitalWrite(20,LOW);
-    m_pMyDevice->I2cDevAddr      = 0x2b;
+    m_pMyDevice->I2cDevAddr      = 0x29;
 printf("---------- code:%d\n",VL53L0X_SetDeviceAddress(m_pMyDevice,	m_pMyDevice->I2cDevAddr << 1));
  
 
@@ -56,7 +56,7 @@ printf("---------- code:%d\n",VL53L0X_SetDeviceAddress(m_pMyDevice,	m_pMyDevice-
   digitalWrite(20,HIGH);
 
 
-    if (MyDevice.fd<0) {
+//    if (MyDevice.fd<0) {
     if (m_pMyDevice->fd<0) {
         Status = VL53L0X_ERROR_CONTROL_INTERFACE;
         printf ("Failed to init\n");
