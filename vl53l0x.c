@@ -48,12 +48,12 @@ VL53L0X_Error VL53L0X_init(void)
     // Initialize Comms
     pinMode(20,OUTPUT);  
     digitalWrite(20,LOW);
-    m_pMyDevice->I2cDevAddr      = 0x2b;
+    m_pMyDevice->I2cDevAddr      = 0x29;
 printf("---------- code:%d\n",VL53L0X_SetDeviceAddress(m_pMyDevice,	m_pMyDevice->I2cDevAddr << 1));
  
 
     m_pMyDevice->fd = VL53L0X_i2c_init("/dev/i2c-1", m_pMyDevice->I2cDevAddr); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3
-  digitalWrite(20,HIGH);
+  //digitalWrite(20,HIGH);
 
 
 //    if (MyDevice.fd<0) {
