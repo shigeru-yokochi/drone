@@ -3,6 +3,7 @@
 #include "vl53l0x_api.h"
 #include "vl53l0x_platform.h"
 #include <wiringPi.h>
+#include <unistd.h>
 
 #define VERSION_REQUIRED_MAJOR 	1
 #define VERSION_REQUIRED_MINOR 	0
