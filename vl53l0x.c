@@ -45,15 +45,14 @@ VL53L0X_Error VL53L0X_init(void)
 	m_pResults = 0;
 	m_measurement = 0;
 
-    // xshutをlow-highにしてi2cアドレスをdefaultの0x29にする
+    // xshutをlow-highにしてi2cアドレスをdefaultの0x29で初期化する
     pinMode(20,OUTPUT);  
     digitalWrite(20,LOW);
     digitalWrite(20,HIGH);
-    //defaultで初期化
     m_pMyDevice->fd = VL53L0X_i2c_init("/dev/i2c-1", 0x29); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3 
     //i2cアドレス指定して再度初期化
     m_pMyDevice->I2cDevAddr      = 0x2e;
-    VL53L0X_SetDeviceAddress(m_pMyDevice,	m_pMyDevice->I2cDevAddr<<1));
+    VL53L0X_SetDeviceAddress(m_pMyDevice,	m_pMyDevice->I2cDevAddr<<1);
     m_pMyDevice->fd = VL53L0X_i2c_init("/dev/i2c-1", m_pMyDevice->I2cDevAddr); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3
 
 
