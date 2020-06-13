@@ -51,7 +51,7 @@ VL53L0X_Error VL53L0X_init(void)
     sleep(1);
  
     digitalWrite(20,LOW);
-    sleep(1)
+    sleep(1);
     m_pMyDevice->I2cDevAddr      = 0x3b;
 printf("---------- code:%d\n",VL53L0X_SetDeviceAddress(m_pMyDevice,	m_pMyDevice->I2cDevAddr << 1));
  
