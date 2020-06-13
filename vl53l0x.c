@@ -45,7 +45,7 @@ VL53L0X_Error VL53L0X_init(void)
 	m_measurement = 0;
 
     // Initialize Comms
-    m_pMyDevice->I2cDevAddr      = 0x29;
+    m_pMyDevice->I2cDevAddr      = 0x3b;
 
 VL53L0X_SetDeviceAddress(m_pMyDevice,	m_pMyDevice->I2cDevAddr);
 
