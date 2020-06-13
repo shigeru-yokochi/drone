@@ -47,7 +47,7 @@ VL53L0X_Error VL53L0X_init(void)
     // Initialize Comms
     m_pMyDevice->I2cDevAddr      = 0x29;
 
-printf("******** code:%d¥n",VL53L0X_SetDeviceAddress(m_pMyDevice,	0x3b));
+printf("---------- code:%s\n",VL53L0X_SetDeviceAddress(m_pMyDevice,	0x3b));
 
     m_pMyDevice->fd = VL53L0X_i2c_init("/dev/i2c-1", m_pMyDevice->I2cDevAddr); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3
 //    if (MyDevice.fd<0) {
