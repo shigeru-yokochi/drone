@@ -48,7 +48,7 @@ VL53L0X_Error VL53L0X_init(void)
     // Initialize Comms
     pinMode(20,OUTPUT);  
     digitalWrite(20,LOW);
-    m_pMyDevice->I2cDevAddr      = 0x29;
+    m_pMyDevice->I2cDevAddr      = 0x2b;
 printf("---------- code:%d\n",VL53L0X_SetDeviceAddress(m_pMyDevice,	m_pMyDevice->I2cDevAddr << 1));
  
 
