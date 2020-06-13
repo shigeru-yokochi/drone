@@ -190,17 +190,17 @@ int main(int argc, char **argv)
 	BETAFPV_F4_2S_AIO_Main_Loop();
 TAG_EXIT:
 	//終了処理
-	PCA9685_pwmWrite(0, 0);
-	PCA9685_pwmWrite(1, 0);
-	PCA9685_pwmWrite(2, 0);
-	PCA9685_pwmWrite(3, 0);
-	PCA9685_pwmWrite(4, 0);
-	PCA9685_pwmWrite(5, 0);
-	PCA9685_pwmWrite(6, 0);
+//	PCA9685_pwmWrite(0, 0);
+//	PCA9685_pwmWrite(1, 0);
+//	PCA9685_pwmWrite(2, 0);
+//	PCA9685_pwmWrite(3, 0);
+//	PCA9685_pwmWrite(4, 0);
+//	PCA9685_pwmWrite(5, 0);
+//	PCA9685_pwmWrite(6, 0);
 	
 
-	VL53L0X_close();
-	Ble_close();
+//	VL53L0X_close();
+//	Ble_close();
 
 	fclose(m_fp);
 	fclose(m_fpVL53L0X);
@@ -213,7 +213,7 @@ TAG_EXIT:
 ********************************************************************************/
 static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 {
-		uint16_t VL53L0X_Measurement;		//測定値(mm)
+	uint16_t VL53L0X_Measurement;		//測定値(mm)
 	char tmp[256];
 //	double dfPower[4];		//pwm1..4の個別用出力調整値
 	int nHeadPower[4];		//指定方向へ移動するための出力値
@@ -230,15 +230,15 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 
 	//BETAFPV_F4_2S_AIO init
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL		, BETAFPV_F4_2S_AIO_NEUTRAL);
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH	, BETAFPV_F4_2S_AIO_NEUTRAL);
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_YAW		, BETAFPV_F4_2S_AIO_NEUTRAL);
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE	, BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE);
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM		, BETAFPV_F4_2S_AIO_ARM_OFF);
-	sleep(1);
+//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL		, BETAFPV_F4_2S_AIO_NEUTRAL);
+//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH	, BETAFPV_F4_2S_AIO_NEUTRAL);
+//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_YAW		, BETAFPV_F4_2S_AIO_NEUTRAL);
+//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE	, BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE);
+//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM		, BETAFPV_F4_2S_AIO_ARM_OFF);
+//	sleep(1);
 
-	printf("--- arming start\n");
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM, BETAFPV_F4_2S_AIO_ARM_ON);
+//	printf("--- arming start\n");
+//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM, BETAFPV_F4_2S_AIO_ARM_ON);
 
 	memset(&m_AttitudeData, 0, sizeof(m_AttitudeData));//初期化
 
@@ -315,8 +315,8 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 
 		//モータ出力
-		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement,m_AttitudeData.aay);
+//		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
+//		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement,m_AttitudeData.aay);
 
 	}	//for()
 
@@ -327,11 +327,11 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 
 
-	printf("--- throttle neutral\n");
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE);
+//	printf("--- throttle neutral\n");
+//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE);
 
-	printf("--- arming stop!\n");
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM, BETAFPV_F4_2S_AIO_ARM_OFF);
+//	printf("--- arming stop!\n");
+//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM, BETAFPV_F4_2S_AIO_ARM_OFF);
 	sleep(1);	
 
 
@@ -1117,12 +1117,12 @@ static int I2c_device_init(void)
 //	}
 //	printf("--- MPU6050_init() OK\n");
 
-	if(PCA9685_init() != 0){					//PWMドライバ
-		printf("*** PCA9685_init()err\n");
-		VL53L0X_close();
-		return -1;
-	}
-	printf("--- PCA9685_init() OK\n");
+//	if(PCA9685_init() != 0){					//PWMドライバ
+//		printf("*** PCA9685_init()err\n");
+//		VL53L0X_close();
+//		return -1;
+//	}
+//	printf("--- PCA9685_init() OK\n");
 
 //	if (HMC5883L_init() == 1) {					//コンパス
 //		printf("*** HMC5883L_init() error.\n");
