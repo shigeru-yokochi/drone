@@ -118,8 +118,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define MINIMUM_GROUND_CLEARANCE	41	//最小地上高
 #define MAXIMUM_GROUND_CLEARANCE	400	//最大地上高(できるだけ高くするmax500目標)
 
-#define DEBUG_MAINLOOP_TO			4	//デバッグ用メインループタイムアウト指定(sec)
-#define FLIGHT_TIME					3	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
+#define DEBUG_MAINLOOP_TO			2	//デバッグ用メインループタイムアウト指定(sec)
+#define FLIGHT_TIME					1	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
 #define OFFSET_POWER				700
 #define LANDING_POWER				500
 
