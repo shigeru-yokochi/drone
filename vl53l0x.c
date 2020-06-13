@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "vl53l0x_api.h"
 #include "vl53l0x_platform.h"
+#include <wiringPi.h>
 
 #define VERSION_REQUIRED_MAJOR 	1
 #define VERSION_REQUIRED_MINOR 	0
@@ -45,6 +46,7 @@ VL53L0X_Error VL53L0X_init(void)
 	m_measurement = 0;
 
     // Initialize Comms
+    pinMode(20,OUTPUT);  
     m_pMyDevice->I2cDevAddr      = 0x1d;
 
 
