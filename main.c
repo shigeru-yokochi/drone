@@ -301,13 +301,13 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 
 		//ジャイロ/加速度
-		MPU6050_GetMeasurements(&m_AttitudeData.yaw,
-								&m_AttitudeData.pitch,
-								&m_AttitudeData.roll,
-								&m_AttitudeData.aax,
-								&m_AttitudeData.aay,
-								&m_AttitudeData.aaz,
-								m_fp);//MPU6050測定値獲得
+//		MPU6050_GetMeasurements(&m_AttitudeData.yaw,
+//								&m_AttitudeData.pitch,
+//								&m_AttitudeData.roll,
+//								&m_AttitudeData.aax,
+//								&m_AttitudeData.aay,
+//								&m_AttitudeData.aaz,
+//								m_fp);//MPU6050測定値獲得
 
 																				
 
