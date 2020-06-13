@@ -316,7 +316,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 		//モータ出力
 //		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-//		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement,m_AttitudeData.aay);
+		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement,m_AttitudeData.aay);
 
 	}	//for()
 
