@@ -3,7 +3,6 @@
 #include "vl53l0x_api.h"
 #include "vl53l0x_platform.h"
 #include <wiringPi.h>
-#include <unistd.h>
 
 #define VERSION_REQUIRED_MAJOR 	1
 #define VERSION_REQUIRED_MINOR 	0
@@ -46,24 +45,17 @@ VL53L0X_Error VL53L0X_init(void)
 	m_pResults = 0;
 	m_measurement = 0;
 
-    // Initialize Comms
+    // xshutをlow-highにしてi2cアドレスをdefaultの0x29にする
     pinMode(20,OUTPUT);  
-   digitalWrite(20,LOW);
-   digitalWrite(20,HIGH);
-   
-  //   sleep(1);
-    m_pMyDevice->I2cDevAddr      = 0x29;
-     m_pMyDevice->fd = VL53L0X_i2c_init("/dev/i2c-1", m_pMyDevice->I2cDevAddr); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3
- 
- 
+    digitalWrite(20,LOW);
+    digitalWrite(20,HIGH);
+    //defaultで初期化
+    m_pMyDevice->fd = VL53L0X_i2c_init("/dev/i2c-1", 0x29); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3 
+    //i2cアドレス指定して再度初期化
     m_pMyDevice->I2cDevAddr      = 0x2e;
- printf("---------- code:%d\n",VL53L0X_SetDeviceAddress(m_pMyDevice,	m_pMyDevice->I2cDevAddr<<1));
-     m_pMyDevice->fd = VL53L0X_i2c_init("/dev/i2c-1", m_pMyDevice->I2cDevAddr); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3
+    VL53L0X_SetDeviceAddress(m_pMyDevice,	m_pMyDevice->I2cDevAddr<<1));
+    m_pMyDevice->fd = VL53L0X_i2c_init("/dev/i2c-1", m_pMyDevice->I2cDevAddr); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3
 
- //    digitalWrite(20,LOW);
- 
- //digitalWrite(20,HIGH);
- 
 
 //    if (MyDevice.fd<0) {
     if (m_pMyDevice->fd<0) {
