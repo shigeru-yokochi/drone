@@ -17,7 +17,7 @@ extern int BleRSSI();
 extern int Ble_close();
 
 //VL53L0X
-extern VL53L0X_Error VL53L0X_init(void);
+extern VL53L0X_Error VL53L0X_init(int xshut_gpio,int i2c_address);
 extern void VL53L0X_close(void);
 extern VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement);
 //MPU6050
@@ -1112,7 +1112,7 @@ static void BLHeli_init(void)
 static int I2c_device_init(void)
 {
 	//初期化
-	if(VL53L0X_init() != VL53L0X_ERROR_NONE){	//距離センサ
+	if(VL53L0X_init(20,0x2a) != VL53L0X_ERROR_NONE){	//距離センサ
 		printf("*** VL53L0X_init()err\n");
 		return -1;
 	}
