@@ -40,7 +40,7 @@ VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t dev
 
     printf ("VL53L0X PAL Continuous Ranging example\n\n");
 
-	m_pMyDevice[device_id] = &m_MyDevice[device_id];
+	m_pMyDevice[0] = &m_MyDevice[0];
 	m_pRangingMeasurementData[device_id]    = &m_RangingMeasurementData[device_id];
 	m_pResults[device_id] = 0;
 	m_measurement[device_id] = 0;
