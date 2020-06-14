@@ -279,15 +279,15 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 		//最大地上高で静止させる
 		if (dfFlightTime <= FLIGHT_TIME) {
-			if (VL53L0X_Measurement > MAXIMUM_GROUND_CLEARANCE) {
-				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement){//降下を検知したら再上昇させる
+			if (VL53L0X_Measurement[0] > MAXIMUM_GROUND_CLEARANCE) {
+				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement[0]){//降下を検知したら再上昇させる
 					nOffsetPower = OFFSET_POWER+20;
 					nMode= 0;	
 				}
 				else{
 					nMode= 1;	//最大地上高検知
 					nOffsetPower = LANDING_POWER;//降下開始
-					nSaveHeight = VL53L0X_Measurement;
+					nSaveHeight = VL53L0X_Measurement[0];
 				}
 			}
 			else {
@@ -296,12 +296,12 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		}
 
 
-//	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement);								//degbug地上高(mm)
+//	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement[0]);								//degbug地上高(mm)
 //		DebugPrint(tmp,m_fpVL53L0X);													//debug用
 
 		if (dfFlightTime >= 2.0) {
-			if(VL53L0X_Measurement < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
-				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement,MINIMUM_GROUND_CLEARANCE);
+			if(VL53L0X_Measurement[0] < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
+				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement[0],MINIMUM_GROUND_CLEARANCE);
 				break;
 			}
 		}
@@ -323,7 +323,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 		//モータ出力
 //		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement,m_AttitudeData.aay);
+		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement[0],m_AttitudeData.aay);
 
 	}	//for()
 
