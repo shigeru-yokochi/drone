@@ -11,9 +11,9 @@
 
 #define DEVICE_MAX              5   //i2cアドレスを変更した場合の最大デバイス数
 
-VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,int devive_id);
-void VL53L0X_close(uint16_t devive_id);
-VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t devive_id);
+VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t device_id);
+void VL53L0X_close(uint16_t device_id);
+VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t device_id);
 
 
 static VL53L0X_Error VL53L0X_WaitMeasurementDataReady(VL53L0X_DEV Dev);
@@ -29,7 +29,7 @@ static VL53L0X_Error VL53L0X_WaitStopCompleted(VL53L0X_DEV Dev);
 /************************************************************************
 *	初期化
 ************************************************************************/
-VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,int devive_id)
+VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t device_id)
 {
     VL53L0X_Error 			Status = VL53L0X_ERROR_NONE;
     VL53L0X_Version_t		Version;

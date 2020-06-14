@@ -17,9 +17,9 @@ extern int BleRSSI();
 extern int Ble_close();
 
 //VL53L0X
-extern VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t devive_id);
-extern void VL53L0X_close(uint16_t devive_id);
-extern VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,int devive_id);
+extern VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t device_id);
+extern void VL53L0X_close(uint16_t device_id);
+extern VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t device_id);
 //MPU6050
 extern uint8_t MPU6050_init();
 extern void MPU6050_GetMeasurements(float *yaw,float *pitch,float *roll, int *aax, int *aay, int *aaz, FILE *fplog);
