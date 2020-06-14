@@ -175,53 +175,53 @@ VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t dev
 /************************************************************************
 *	測定値獲得
 ************************************************************************/
-VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t devive_id)
+VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t device_id)
 {
     VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 
-    Status = VL53L0X_WaitMeasurementDataReady(m_pMyDevice[devive_id]);
+    Status = VL53L0X_WaitMeasurementDataReady(m_pMyDevice[device_id]);
     if(Status != VL53L0X_ERROR_NONE)return Status;;
 
-    Status = VL53L0X_GetRangingMeasurementData(m_pMyDevice[devive_id], m_pRangingMeasurementData[devive_id]);
-    *(m_pResults[devive_id] + m_measurement[devive_id]) = m_pRangingMeasurementData[devive_id]->RangeMilliMeter;
-//    printf("In loop m_measurement[devive_id] %d: %d\n", m_measurement[devive_id], m_pRangingMeasurementData[devive_id]->RangeMilliMeter);
+    Status = VL53L0X_GetRangingMeasurementData(m_pMyDevice[device_id], m_pRangingMeasurementData[device_id]);
+    *(m_pResults[device_id] + m_measurement[device_id]) = m_pRangingMeasurementData[device_id]->RangeMilliMeter;
+//    printf("In loop m_measurement[device_id] %d: %d\n", m_measurement[device_id], m_pRangingMeasurementData[device_id]->RangeMilliMeter);
 
-    VL53L0X_ClearInterruptMask(m_pMyDevice[devive_id], VL53L0X_REG_SYSTEM_INTERRUPT_GPIO_NEW_SAMPLE_READY);
+    VL53L0X_ClearInterruptMask(m_pMyDevice[device_id], VL53L0X_REG_SYSTEM_INTERRUPT_GPIO_NEW_SAMPLE_READY);
 
-	m_measurement[devive_id]++;
-	if(m_measurement[devive_id] == MEASUREMENTS_MAX){
-		m_measurement[devive_id] = 0;
+	m_measurement[device_id]++;
+	if(m_measurement[device_id] == MEASUREMENTS_MAX){
+		m_measurement[device_id] = 0;
 	}
 
-	*pVL53L0X_Measurement = m_pRangingMeasurementData[devive_id]->RangeMilliMeter;
+	*pVL53L0X_Measurement = m_pRangingMeasurementData[device_id]->RangeMilliMeter;
 
     return Status;
 }
 /************************************************************************
 *	終了処理
 ************************************************************************/
-void VL53L0X_close(,uint16_t devive_id)
+void VL53L0X_close(uint16_t device_id)
 {
     VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 
-	if(m_pResults[devive_id] != 0){
-	    free(m_pResults[devive_id]);
+	if(m_pResults[device_id] != 0){
+	    free(m_pResults[device_id]);
 	}
 
     if(Status == VL53L0X_ERROR_NONE)
     {
         printf ("Call of VL53L0X_StopMeasurement\n");
-        Status = VL53L0X_StopMeasurement(m_pMyDevice[devive_id]);
+        Status = VL53L0X_StopMeasurement(m_pMyDevice[device_id]);
     }
 
     if(Status == VL53L0X_ERROR_NONE)
     {
         printf ("VL53L0X_Wait Stop to be competed\n");
-        Status = VL53L0X_WaitStopCompleted(m_pMyDevice[devive_id]);
+        Status = VL53L0X_WaitStopCompleted(m_pMyDevice[device_id]);
     }
 
     if(Status == VL53L0X_ERROR_NONE){
-		Status = VL53L0X_ClearInterruptMask(m_pMyDevice[devive_id],
+		Status = VL53L0X_ClearInterruptMask(m_pMyDevice[device_id],
 			VL53L0X_REG_SYSTEM_INTERRUPT_GPIO_NEW_SAMPLE_READY);
 	}
 
