@@ -215,6 +215,8 @@ TAG_EXIT:
 	
 
 	VL53L0X_close(0);
+	VL53L0X_close(1);
+
 //	Ble_close();
 
 	fclose(m_fp);
@@ -1135,6 +1137,12 @@ static int I2c_device_init(void)
 		printf("*** VL53L0X_init()err\n");
 		return -1;
 	}
+	if(VL53L0X_init(VL53L0X_XSHUT_2_GPIO,0x2b,1) != VL53L0X_ERROR_NONE){	//距離センサ 2
+		printf("*** VL53L0X_init()err\n");
+		return -1;
+	}
+
+
 
 
 	printf("--- VL53L0X_init() OK\n");
