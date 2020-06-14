@@ -17,9 +17,9 @@ extern int BleRSSI();
 extern int Ble_close();
 
 //VL53L0X
-extern VL53L0X_Error VL53L0X_init(int xshut_gpio,int i2c_address);
-extern void VL53L0X_close(void);
-extern VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement);
+extern VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t devive_id);
+extern void VL53L0X_close(uint16_t devive_id);
+extern VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t devive_id);
 //MPU6050
 extern uint8_t MPU6050_init();
 extern void MPU6050_GetMeasurements(float *yaw,float *pitch,float *roll, int *aax, int *aay, int *aaz, FILE *fplog);
@@ -207,7 +207,7 @@ TAG_EXIT:
 //	PCA9685_pwmWrite(6, 0);
 	
 
-//	VL53L0X_close();
+//	VL53L0X_close(0);
 //	Ble_close();
 
 	fclose(m_fp);
@@ -221,7 +221,7 @@ TAG_EXIT:
 ********************************************************************************/
 static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 {
-	uint16_t VL53L0X_Measurement;		//測定値(mm)
+	uint16_t VL53L0X_Measurement[5];		//device5台の測定値(mm)
 	char tmp[256];
 //	double dfPower[4];		//pwm1..4の個別用出力調整値
 	int nHeadPower[4];		//指定方向へ移動するための出力値
@@ -267,13 +267,12 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		}
 
 
-
 		if (dfFlightTime > FLIGHT_TIME) {
 			nOffsetPower = LANDING_POWER;	//landing power
 		}
 
 
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
 
 
 
@@ -466,7 +465,7 @@ static void Naze32_Main_Loop(void)
 //			printf("--- stop. Debug Time out. [%0.0lfs]\n",DEBUG_MAINLOOP_TO);
 //			break;
 //		}
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement,0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
 
 
 
@@ -633,7 +632,7 @@ static void Loop(void)
 //			printf("--- stop. Debug Time out. [%0.0lfs]\n",DEBUG_MAINLOOP_TO);
 //			break;
 //		}
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement,0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
 
 
 /*
@@ -973,7 +972,7 @@ static int SetPwmBalance(int nPwm1,int nPwm2)
 			break;
 		}
 
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement,0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
 //	    printf("VL53L0X:%dmm  pwm=%d\n", VL53L0X_Measurement,i);								//degbug地上高(mm)
 		if(i == 0)save=VL53L0X_Measurement;
 		if(save+7 < VL53L0X_Measurement){//7mm上昇したら
@@ -1112,7 +1111,7 @@ static void BLHeli_init(void)
 static int I2c_device_init(void)
 {
 	//初期化
-	if(VL53L0X_init(20,0x2a) != VL53L0X_ERROR_NONE){	//距離センサ
+	if(VL53L0X_init(20,0x2a,0) != VL53L0X_ERROR_NONE){	//距離センサ
 		printf("*** VL53L0X_init()err\n");
 		return -1;
 	}
@@ -1120,21 +1119,21 @@ static int I2c_device_init(void)
 
 //	if(MPU6050_init() != 0){						//ジャイロ加速度センサ
 //		printf("*** MPU6050_init()err\n");
-//		VL53L0X_close();
+//		VL53L0X_close(0);
 //		return -1;
 //	}
 //	printf("--- MPU6050_init() OK\n");
 
 //	if(PCA9685_init() != 0){					//PWMドライバ
 //		printf("*** PCA9685_init()err\n");
-//		VL53L0X_close();
+//		VL53L0X_close(0);
 //		return -1;
 //	}
 //	printf("--- PCA9685_init() OK\n");
 
 //	if (HMC5883L_init() == 1) {					//コンパス
 //		printf("*** HMC5883L_init() error.\n");
-//		VL53L0X_close();
+//		VL53L0X_close(0);
 //		return -1;
 //	}
 //	printf("--- HMC5883L_init() OK\n");
@@ -1150,14 +1149,14 @@ static int Debug_Print_init(void)
 {
 	if((m_fp = fopen("/tmp/test.log", "w")) == NULL) {	//debug用 ジャイロ加速度センサ値表示
 		printf("fopen err\n");
-		VL53L0X_close();
+		VL53L0X_close(0);
 		return -1;
 	}
 
 	if((m_fpVL53L0X = fopen("/tmp/VL53L0X.log", "w")) == NULL) {//debug用 距離センサ値表示
 		printf("fopen err\n");
 		fclose(m_fp);
-		VL53L0X_close();
+		VL53L0X_close(0);
 		return -1;
 	}
 

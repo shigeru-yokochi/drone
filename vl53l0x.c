@@ -9,26 +9,27 @@
 #define VERSION_REQUIRED_BUILD 	1
 #define MEASUREMENTS_MAX		256
 
+#define DEVICE_MAX              5   //i2cアドレスを変更した場合の最大デバイス数
 
-VL53L0X_Error VL53L0X_init(void);
-void VL53L0X_close(void);
-VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement);
+VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t devive_id);
+void VL53L0X_close(uint16_t devive_id);
+VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t devive_id);
 
 
 static VL53L0X_Error VL53L0X_WaitMeasurementDataReady(VL53L0X_DEV Dev);
-static VL53L0X_Dev_t m_MyDevice;
-static VL53L0X_Dev_t *m_pMyDevice;
-static VL53L0X_RangingMeasurementData_t m_RangingMeasurementData;
-static VL53L0X_RangingMeasurementData_t *m_pRangingMeasurementData;
-static uint16_t* m_pResults;
-static uint32_t m_measurement;
+static VL53L0X_Dev_t m_MyDevice[DEVICE_MAX];
+static VL53L0X_Dev_t *m_pMyDevice[DEVICE_MAX];
+static VL53L0X_RangingMeasurementData_t m_RangingMeasurementData[DEVICE_MAX];
+static VL53L0X_RangingMeasurementData_t *m_pRangingMeasurementData[DEVICE_MAX];
+static uint16_t* m_pResults[DEVICE_MAX];
+static uint32_t m_measurement[DEVICE_MAX];
 
 static void VL53L0X_print_pal_error(VL53L0X_Error Status);
 static VL53L0X_Error VL53L0X_WaitStopCompleted(VL53L0X_DEV Dev);
 /************************************************************************
 *	初期化
 ************************************************************************/
-VL53L0X_Error VL53L0X_init(int xshut_gpio,int i2c_address)
+VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t devive_id)
 {
     VL53L0X_Error 			Status = VL53L0X_ERROR_NONE;
     VL53L0X_Version_t		Version;
@@ -37,27 +38,26 @@ VL53L0X_Error VL53L0X_init(int xshut_gpio,int i2c_address)
     int32_t status_int;
 
 
-
     printf ("VL53L0X PAL Continuous Ranging example\n\n");
 
-	m_pMyDevice = &m_MyDevice;
-	m_pRangingMeasurementData    = &m_RangingMeasurementData;
-	m_pResults = 0;
-	m_measurement = 0;
+	m_pMyDevice[device_id] = &m_MyDevice[device_id];
+	m_pRangingMeasurementData[device_id]    = &m_RangingMeasurementData[device_id];
+	m_pResults[device_id] = 0;
+	m_measurement[device_id] = 0;
 
     // xshutをlow-highにしてi2cアドレスをdefaultの0x29で初期化する
     pinMode(xshut_gpio,OUTPUT);  
     digitalWrite(xshut_gpio,LOW);
     digitalWrite(xshut_gpio,HIGH);
-    m_pMyDevice->fd = VL53L0X_i2c_init("/dev/i2c-1", 0x29); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3 
+    m_pMyDevice[device_id]->fd = VL53L0X_i2c_init("/dev/i2c-1", 0x29); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3 
     //i2cアドレス指定して再度初期化
-    m_pMyDevice->I2cDevAddr      = i2c_address;
-    VL53L0X_SetDeviceAddress(m_pMyDevice,	m_pMyDevice->I2cDevAddr<<1);
-    m_pMyDevice->fd = VL53L0X_i2c_init("/dev/i2c-1", m_pMyDevice->I2cDevAddr); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3
+    m_pMyDevice[device_id]->I2cDevAddr      = i2c_address;
+    VL53L0X_SetDeviceAddress(m_pMyDevice[device_id],	m_pMyDevice[device_id]->I2cDevAddr<<1);
+    m_pMyDevice[device_id]->fd = VL53L0X_i2c_init("/dev/i2c-1", m_pMyDevice[device_id]->I2cDevAddr); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3
 
 
 //    if (MyDevice.fd<0) {
-    if (m_pMyDevice->fd<0) {
+    if (m_pMyDevice[device_id]->fd<0) {
         Status = VL53L0X_ERROR_CONTROL_INTERFACE;
         printf ("Failed to init\n");
     }
@@ -94,14 +94,14 @@ VL53L0X_Error VL53L0X_init(int xshut_gpio,int i2c_address)
     {
         printf ("Call of VL53L0X_DataInit\n");
 //        Status = VL53L0X_DataInit(&MyDevice); // Data initialization
-        Status = VL53L0X_DataInit(m_pMyDevice); // Data initialization
+        Status = VL53L0X_DataInit(m_pMyDevice[device_id]); // Data initialization
         VL53L0X_print_pal_error(Status);
     }
     
     if(Status == VL53L0X_ERROR_NONE)
     {
 //        Status = VL53L0X_GetDeviceInfo(&MyDevice, &DeviceInfo);
-        Status = VL53L0X_GetDeviceInfo(m_pMyDevice, &DeviceInfo);
+        Status = VL53L0X_GetDeviceInfo(m_pMyDevice[device_id], &DeviceInfo);
     }
     if(Status == VL53L0X_ERROR_NONE)
     {
@@ -129,14 +129,14 @@ VL53L0X_Error VL53L0X_init(int xshut_gpio,int i2c_address)
     if(Status == VL53L0X_ERROR_NONE)
     {
         printf ("Call of VL53L0X_StaticInit\n");
-        Status = VL53L0X_StaticInit(m_pMyDevice); // Device Initialization
+        Status = VL53L0X_StaticInit(m_pMyDevice[device_id]); // Device Initialization
         // StaticInit will set interrupt by default
         VL53L0X_print_pal_error(Status);
     }
     if(Status == VL53L0X_ERROR_NONE)
     {
         printf ("Call of VL53L0X_PerformRefCalibration\n");
-        Status = VL53L0X_PerformRefCalibration(m_pMyDevice,
+        Status = VL53L0X_PerformRefCalibration(m_pMyDevice[device_id],
         		&VhvSettings, &PhaseCal); // Device Initialization
         VL53L0X_print_pal_error(Status);
     }
@@ -144,7 +144,7 @@ VL53L0X_Error VL53L0X_init(int xshut_gpio,int i2c_address)
     if(Status == VL53L0X_ERROR_NONE)
     {
         printf ("Call of VL53L0X_PerformRefSpadManagement\n");
-        Status = VL53L0X_PerformRefSpadManagement(m_pMyDevice,
+        Status = VL53L0X_PerformRefSpadManagement(m_pMyDevice[device_id],
         		&refSpadCount, &isApertureSpads); // Device Initialization
         VL53L0X_print_pal_error(Status);
     }
@@ -153,20 +153,20 @@ VL53L0X_Error VL53L0X_init(int xshut_gpio,int i2c_address)
     {
 
         printf ("Call of VL53L0X_SetDeviceMode\n");
-        Status = VL53L0X_SetDeviceMode(m_pMyDevice, VL53L0X_DEVICEMODE_CONTINUOUS_RANGING); // Setup in single ranging mode
+        Status = VL53L0X_SetDeviceMode(m_pMyDevice[device_id], VL53L0X_DEVICEMODE_CONTINUOUS_RANGING); // Setup in single ranging mode
         VL53L0X_print_pal_error(Status);
     }
     
     if(Status == VL53L0X_ERROR_NONE)
     {
 		printf ("Call of VL53L0X_StartMeasurement\n");
-		Status = VL53L0X_StartMeasurement(m_pMyDevice);
+		Status = VL53L0X_StartMeasurement(m_pMyDevice[device_id]);
 		VL53L0X_print_pal_error(Status);
     }
 
     if(Status == VL53L0X_ERROR_NONE)
     {
-		m_pResults = (uint16_t*)malloc(sizeof(uint16_t) * MEASUREMENTS_MAX);
+		m_pResults[device_id] = (uint16_t*)malloc(sizeof(uint16_t) * MEASUREMENTS_MAX);
 	}
 
 
@@ -175,53 +175,53 @@ VL53L0X_Error VL53L0X_init(int xshut_gpio,int i2c_address)
 /************************************************************************
 *	測定値獲得
 ************************************************************************/
-VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement)
+VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t devive_id)
 {
     VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 
-    Status = VL53L0X_WaitMeasurementDataReady(m_pMyDevice);
+    Status = VL53L0X_WaitMeasurementDataReady(m_pMyDevice[devive_id]);
     if(Status != VL53L0X_ERROR_NONE)return Status;;
 
-    Status = VL53L0X_GetRangingMeasurementData(m_pMyDevice, m_pRangingMeasurementData);
-    *(m_pResults + m_measurement) = m_pRangingMeasurementData->RangeMilliMeter;
-//    printf("In loop m_measurement %d: %d\n", m_measurement, m_pRangingMeasurementData->RangeMilliMeter);
+    Status = VL53L0X_GetRangingMeasurementData(m_pMyDevice[devive_id], m_pRangingMeasurementData[devive_id]);
+    *(m_pResults[devive_id] + m_measurement[devive_id]) = m_pRangingMeasurementData[devive_id]->RangeMilliMeter;
+//    printf("In loop m_measurement[devive_id] %d: %d\n", m_measurement[devive_id], m_pRangingMeasurementData[devive_id]->RangeMilliMeter);
 
-    VL53L0X_ClearInterruptMask(m_pMyDevice, VL53L0X_REG_SYSTEM_INTERRUPT_GPIO_NEW_SAMPLE_READY);
+    VL53L0X_ClearInterruptMask(m_pMyDevice[devive_id], VL53L0X_REG_SYSTEM_INTERRUPT_GPIO_NEW_SAMPLE_READY);
 
-	m_measurement++;
-	if(m_measurement == MEASUREMENTS_MAX){
-		m_measurement = 0;
+	m_measurement[devive_id]++;
+	if(m_measurement[devive_id] == MEASUREMENTS_MAX){
+		m_measurement[devive_id] = 0;
 	}
 
-	*pVL53L0X_Measurement = m_pRangingMeasurementData->RangeMilliMeter;
+	*pVL53L0X_Measurement = m_pRangingMeasurementData[devive_id]->RangeMilliMeter;
 
     return Status;
 }
 /************************************************************************
 *	終了処理
 ************************************************************************/
-void VL53L0X_close(void)
+void VL53L0X_close(,uint16_t devive_id)
 {
     VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 
-	if(m_pResults != 0){
-	    free(m_pResults);
+	if(m_pResults[devive_id] != 0){
+	    free(m_pResults[devive_id]);
 	}
 
     if(Status == VL53L0X_ERROR_NONE)
     {
         printf ("Call of VL53L0X_StopMeasurement\n");
-        Status = VL53L0X_StopMeasurement(m_pMyDevice);
+        Status = VL53L0X_StopMeasurement(m_pMyDevice[devive_id]);
     }
 
     if(Status == VL53L0X_ERROR_NONE)
     {
         printf ("VL53L0X_Wait Stop to be competed\n");
-        Status = VL53L0X_WaitStopCompleted(m_pMyDevice);
+        Status = VL53L0X_WaitStopCompleted(m_pMyDevice[devive_id]);
     }
 
     if(Status == VL53L0X_ERROR_NONE){
-		Status = VL53L0X_ClearInterruptMask(m_pMyDevice,
+		Status = VL53L0X_ClearInterruptMask(m_pMyDevice[devive_id],
 			VL53L0X_REG_SYSTEM_INTERRUPT_GPIO_NEW_SAMPLE_READY);
 	}
 
