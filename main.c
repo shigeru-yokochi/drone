@@ -17,6 +17,13 @@ extern int BleRSSI();
 extern int Ble_close();
 
 //VL53L0X
+#define VL53L0X_XSHUT_1_GPIO 20
+#define VL53L0X_XSHUT_2_GPIO 21
+#define VL53L0X_XSHUT_3_GPIO 16
+#define VL53L0X_XSHUT_4_GPIO 26
+#define VL53L0X_XSHUT_5_GPIO 19
+
+
 extern VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t device_id);
 extern void VL53L0X_close(uint16_t device_id);
 extern VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t device_id);
@@ -207,7 +214,7 @@ TAG_EXIT:
 //	PCA9685_pwmWrite(6, 0);
 	
 
-//	VL53L0X_close(0);
+	VL53L0X_close(0);
 //	Ble_close();
 
 	fclose(m_fp);
@@ -1111,10 +1118,25 @@ static void BLHeli_init(void)
 static int I2c_device_init(void)
 {
 	//初期化
-	if(VL53L0X_init(20,0x2a,0) != VL53L0X_ERROR_NONE){	//距離センサ
+
+	//L53L0Xを複数使用するためxshutをlowにする
+   	pinMode(VL53L0X_XSHUT_1_GPIO,OUTPUT);
+   	pinMode(VL53L0X_XSHUT_2_GPIO,OUTPUT);
+   	pinMode(VL53L0X_XSHUT_3_GPIO,OUTPUT);
+   	pinMode(VL53L0X_XSHUT_4_GPIO,OUTPUT);
+   	pinMode(VL53L0X_XSHUT_5_GPIO,OUTPUT);
+    digitalWrite(VL53L0X_XSHUT_1_GPIO,LOW);
+    digitalWrite(VL53L0X_XSHUT_2_GPIO,LOW);
+    digitalWrite(VL53L0X_XSHUT_3_GPIO,LOW);
+    digitalWrite(VL53L0X_XSHUT_4_GPIO,LOW);
+    digitalWrite(VL53L0X_XSHUT_5_GPIO,LOW);
+ 
+	if(VL53L0X_init(VL53L0X_XSHUT_1_GPIO,0x2a,0) != VL53L0X_ERROR_NONE){	//距離センサ 1
 		printf("*** VL53L0X_init()err\n");
 		return -1;
 	}
+
+
 	printf("--- VL53L0X_init() OK\n");
 
 //	if(MPU6050_init() != 0){						//ジャイロ加速度センサ
