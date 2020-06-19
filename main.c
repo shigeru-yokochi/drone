@@ -281,15 +281,15 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 			nOffsetPower = LANDING_POWER;	//landing power
 		}
 
-printf("--- 1\n");
+//printf("--- 1\n");
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 高度用
-printf("--- 2\n");
+//printf("--- 2\n");
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[1],1) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 2つ目
-printf("--- 3\n");
+//printf("--- 3\n");
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[2],2) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 3つ目
-printf("--- 4\n");
+//printf("--- 4\n");
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[3],3) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 4つ目
-printf("--- 5\n");
+//printf("--- 5\n");
 
 
 
@@ -338,7 +338,7 @@ printf("--- 5\n");
 
 //		GetAttitudeControl(dfPower);//姿勢制御値獲得
 
-printf("--- 6\n");
+//printf("--- 6\n");
 
 		//モータ出力
 //		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
@@ -348,7 +348,7 @@ printf("--- 6\n");
 				VL53L0X_Measurement[2],
 				VL53L0X_Measurement[3],m_AttitudeData.aay);
 
-printf("--- 7\n");
+//printf("--- 7\n");
 
 	}	//for()
 
@@ -1157,11 +1157,11 @@ static int I2c_device_init(void)
 		printf("*** VL53L0X_init()err\n");
 		return -1;
 	}
-	if(VL53L0X_init(VL53L0X_XSHUT_3_GPIO,0x2c,1) != VL53L0X_ERROR_NONE){	//距離センサ 3
+	if(VL53L0X_init(VL53L0X_XSHUT_3_GPIO,0x2c,2) != VL53L0X_ERROR_NONE){	//距離センサ 3
 		printf("*** VL53L0X_init()err\n");
 		return -1;
 	}
-	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x2d,1) != VL53L0X_ERROR_NONE){	//距離センサ 4
+	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x2d,3) != VL53L0X_ERROR_NONE){	//距離センサ 4
 		printf("*** VL53L0X_init()err\n");
 		return -1;
 	}
