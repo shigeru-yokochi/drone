@@ -21,7 +21,7 @@ extern int Ble_close();
 #define VL53L0X_XSHUT_1_GPIO 26
 #define VL53L0X_XSHUT_2_GPIO 19
 #define VL53L0X_XSHUT_3_GPIO 20
-#define VL53L0X_XSHUT_4_GPIO 26
+#define VL53L0X_XSHUT_4_GPIO 16
 #define VL53L0X_XSHUT_5_GPIO 21
 
 
