@@ -128,8 +128,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define MINIMUM_GROUND_CLEARANCE	41	//最小地上高
 #define MAXIMUM_GROUND_CLEARANCE	400	//最大地上高(できるだけ高くするmax500目標)
 
-#define DEBUG_MAINLOOP_TO			30	//デバッグ用メインループタイムアウト指定(sec)
-#define FLIGHT_TIME					25	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
+#define DEBUG_MAINLOOP_TO			10	//デバッグ用メインループタイムアウト指定(sec)
+#define FLIGHT_TIME					8	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
 #define OFFSET_POWER				700
 #define LANDING_POWER				500
 
@@ -335,7 +335,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 		//モータ出力
 //		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X(1..4):%4d %4d %4d %4d aay:%d\n", nOffsetPower, dfFlightTime, 
+		printf("OffsetPower:%d time %0.2lf VL53L0X(1..4):%4d %4d %4d %4d aay:%d\n", nOffsetPower, dfFlightTime, 
 				VL53L0X_Measurement[0],
 				VL53L0X_Measurement[1],
 				VL53L0X_Measurement[2],
