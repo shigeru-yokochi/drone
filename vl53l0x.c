@@ -197,8 +197,8 @@ VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t de
 	}
 
 	*pVL53L0X_Measurement = m_pRangingMeasurementData[device_id]->RangeMilliMeter;
-    if(*pVL53L0X_Measurement > 1000){
-        *pVL53L0X_Measurement = 1000;   //8190等の計測不能値を変更する
+    if(*pVL53L0X_Measurement > 1000 || *pVL53L0X_Measurement == 0){
+        *pVL53L0X_Measurement = 1000;   //計測不能値を変更する
     }
 
     return Status;
