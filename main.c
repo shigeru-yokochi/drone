@@ -128,8 +128,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define MINIMUM_GROUND_CLEARANCE	41	//最小地上高
 #define MAXIMUM_GROUND_CLEARANCE	400	//最大地上高(できるだけ高くするmax500目標)
 
-#define DEBUG_MAINLOOP_TO			4	//デバッグ用メインループタイムアウト指定(sec)
-#define FLIGHT_TIME					3	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
+#define DEBUG_MAINLOOP_TO			2	//デバッグ用メインループタイムアウト指定(sec)
+#define FLIGHT_TIME					1	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
 #define OFFSET_POWER				700
 #define LANDING_POWER				500
 
@@ -281,11 +281,15 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 			nOffsetPower = LANDING_POWER;	//landing power
 		}
 
-
+printf("--- 1\n");
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 高度用
+printf("--- 2\n");
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[1],1) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 2つ目
+printf("--- 3\n");
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[2],2) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 3つ目
+printf("--- 4\n");
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[3],3) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 4つ目
+printf("--- 5\n");
 
 
 
@@ -334,6 +338,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 //		GetAttitudeControl(dfPower);//姿勢制御値獲得
 
+printf("--- 6\n");
 
 		//モータ出力
 //		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
@@ -343,6 +348,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 				VL53L0X_Measurement[2],
 				VL53L0X_Measurement[3],m_AttitudeData.aay);
 
+printf("--- 7\n");
 
 	}	//for()
 
