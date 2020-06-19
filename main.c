@@ -281,15 +281,10 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 			nOffsetPower = LANDING_POWER;	//landing power
 		}
 
-//printf("--- 1\n");
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 高度用
-//printf("--- 2\n");
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[1],1) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 2つ目
-//printf("--- 3\n");
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[2],2) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 3つ目
-//printf("--- 4\n");
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[3],3) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 4つ目
-//printf("--- 5\n");
+//		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[2],2) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 3つ目
+//		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[3],3) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 4つ目
 
 
 
@@ -338,8 +333,6 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 //		GetAttitudeControl(dfPower);//姿勢制御値獲得
 
-//printf("--- 6\n");
-
 		//モータ出力
 //		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
 		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X(1..4):%03d %03d %03d %03d aay:%d\n", nOffsetPower, dfFlightTime, 
@@ -347,8 +340,6 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 				VL53L0X_Measurement[1],
 				VL53L0X_Measurement[2],
 				VL53L0X_Measurement[3],m_AttitudeData.aay);
-
-//printf("--- 7\n");
 
 	}	//for()
 
