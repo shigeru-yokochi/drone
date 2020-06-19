@@ -17,11 +17,12 @@ extern int BleRSSI();
 extern int Ble_close();
 
 //VL53L0X
-#define VL53L0X_XSHUT_1_GPIO 20
-#define VL53L0X_XSHUT_2_GPIO 21
-#define VL53L0X_XSHUT_3_GPIO 16
+#define VL53L0X_MAX 5
+#define VL53L0X_XSHUT_1_GPIO 26
+#define VL53L0X_XSHUT_2_GPIO 19
+#define VL53L0X_XSHUT_3_GPIO 20
 #define VL53L0X_XSHUT_4_GPIO 26
-#define VL53L0X_XSHUT_5_GPIO 19
+#define VL53L0X_XSHUT_5_GPIO 21
 
 
 extern VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t device_id);
@@ -230,7 +231,7 @@ TAG_EXIT:
 ********************************************************************************/
 static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 {
-	uint16_t VL53L0X_Measurement[5];		//device5台の測定値(mm)
+	uint16_t VL53L0X_Measurement[VL53L0X_MAX];		//VL53L0X_MAX台分の測定値(mm)
 	char tmp[256];
 //	double dfPower[4];		//pwm1..4の個別用出力調整値
 	int nHeadPower[4];		//指定方向へ移動するための出力値
