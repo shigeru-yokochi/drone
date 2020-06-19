@@ -128,8 +128,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define MINIMUM_GROUND_CLEARANCE	41	//最小地上高
 #define MAXIMUM_GROUND_CLEARANCE	400	//最大地上高(できるだけ高くするmax500目標)
 
-#define DEBUG_MAINLOOP_TO			2	//デバッグ用メインループタイムアウト指定(sec)
-#define FLIGHT_TIME					1	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
+#define DEBUG_MAINLOOP_TO			4	//デバッグ用メインループタイムアウト指定(sec)
+#define FLIGHT_TIME					3	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
 #define OFFSET_POWER				700
 #define LANDING_POWER				500
 
@@ -283,7 +283,9 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 高度用
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[1],1) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 ２つ目
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[1],1) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 2つ目
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[2],2) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 3つ目
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[3],3) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 4つ目
 
 
 
@@ -335,7 +337,11 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 		//モータ出力
 //		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X-1:%d VL53L0X-2:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement[0],VL53L0X_Measurement[1],m_AttitudeData.aay);
+		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X(1..4):%03d %03d %03d %03d aay:%d\n", nOffsetPower, dfFlightTime, 
+				VL53L0X_Measurement[0],
+				VL53L0X_Measurement[1],
+				VL53L0X_Measurement[2],
+				VL53L0X_Measurement[3],m_AttitudeData.aay);
 
 
 	}	//for()
@@ -1142,6 +1148,14 @@ static int I2c_device_init(void)
 		return -1;
 	}
 	if(VL53L0X_init(VL53L0X_XSHUT_2_GPIO,0x2b,1) != VL53L0X_ERROR_NONE){	//距離センサ 2
+		printf("*** VL53L0X_init()err\n");
+		return -1;
+	}
+	if(VL53L0X_init(VL53L0X_XSHUT_3_GPIO,0x2c,1) != VL53L0X_ERROR_NONE){	//距離センサ 3
+		printf("*** VL53L0X_init()err\n");
+		return -1;
+	}
+	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x2d,1) != VL53L0X_ERROR_NONE){	//距離センサ 4
 		printf("*** VL53L0X_init()err\n");
 		return -1;
 	}
