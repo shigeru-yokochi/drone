@@ -302,7 +302,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 		if (dfFlightTime >= 2.0) {
 			if(VL53L0X_Measurement[0] < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
-				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement0],MINIMUM_GROUND_CLEARANCE);
+				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement[0],MINIMUM_GROUND_CLEARANCE);
 				break;
 			}
 		}
