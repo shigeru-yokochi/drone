@@ -21,7 +21,7 @@ extern int Ble_close();
 #define VL53L0X_XSHUT_2_GPIO 19
 #define VL53L0X_XSHUT_3_GPIO 20
 #define VL53L0X_XSHUT_4_GPIO 16
-#define VL53L0X_XSHUT_5_GPIO 21
+#define VL53L0X_XSHUT_5_GPIO 21	//Altitude
 extern VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t device_id);
 extern void VL53L0X_close(uint16_t device_id);
 extern VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t device_id);
@@ -210,7 +210,7 @@ TAG_EXIT:
 	PCA9685_pwmWrite(6, 0);
 	
 
-	VL53L0X_close(0);
+	VL53L0X_close(4);
 
 	Ble_close();
 
@@ -277,22 +277,22 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		}
 
 
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[4],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
 
 
 
 
 		//最大地上高で静止させる
 		if (dfFlightTime <= FLIGHT_TIME) {
-			if (VL53L0X_Measurement[0] > MAXIMUM_GROUND_CLEARANCE) {
-				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement[0]){//降下を検知したら再上昇させる
+			if (VL53L0X_Measurement[4] > MAXIMUM_GROUND_CLEARANCE) {
+				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement[4]){//降下を検知したら再上昇させる
 					nOffsetPower = OFFSET_POWER+20;
 					nMode= 0;	
 				}
 				else{
 					nMode= 1;	//最大地上高検知
 					nOffsetPower = LANDING_POWER;//降下開始
-					nSaveHeight = VL53L0X_Measurement[0];
+					nSaveHeight = VL53L0X_Measurement[4];
 				}
 			}
 			else {
@@ -301,12 +301,12 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		}
 
 
-//	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement[0]);								//degbug地上高(mm)
+//	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement[4]);								//degbug地上高(mm)
 //		DebugPrint(tmp,m_fpVL53L0X);													//debug用
 
 		if (dfFlightTime >= 2.0) {
 			if(VL53L0X_Measurement[0] < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
-				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement[0],MINIMUM_GROUND_CLEARANCE);
+				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement[4],MINIMUM_GROUND_CLEARANCE);
 				break;
 			}
 		}
@@ -328,7 +328,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 		//モータ出力
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement[0],m_AttitudeData.aay);
+		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement[4],m_AttitudeData.aay);
 
 	}	//for()
 
@@ -1126,19 +1126,23 @@ static int I2c_device_init(void)
     digitalWrite(VL53L0X_XSHUT_3_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_4_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_5_GPIO,LOW);
-	if(VL53L0X_init(VL53L0X_XSHUT_1_GPIO,0x2a,0) != VL53L0X_ERROR_NONE){	//距離センサ 1
-		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
-	if(VL53L0X_init(VL53L0X_XSHUT_2_GPIO,0x2b,1) != VL53L0X_ERROR_NONE){	//距離センサ 2
-		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
-	if(VL53L0X_init(VL53L0X_XSHUT_3_GPIO,0x2c,2) != VL53L0X_ERROR_NONE){	//距離センサ 3
-		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
-	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x2d,3) != VL53L0X_ERROR_NONE){	//距離センサ 4
+//	if(VL53L0X_init(VL53L0X_XSHUT_1_GPIO,0x2a,0) != VL53L0X_ERROR_NONE){	//距離センサ 1
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
+//	if(VL53L0X_init(VL53L0X_XSHUT_2_GPIO,0x2b,1) != VL53L0X_ERROR_NONE){	//距離センサ 2
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
+//	if(VL53L0X_init(VL53L0X_XSHUT_3_GPIO,0x2c,2) != VL53L0X_ERROR_NONE){	//距離センサ 3
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
+//	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x2d,3) != VL53L0X_ERROR_NONE){	//距離センサ 4
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
+	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x2e,4) != VL53L0X_ERROR_NONE){	//距離センサ 5 Altitude
 		printf("*** VL53L0X_init()err\n");
 		return -1;
 	}
