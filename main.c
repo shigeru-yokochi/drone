@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <wiringPi.h>
 
 //VL53L0X
 #include "vl53l0x_api.h"
