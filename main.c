@@ -276,8 +276,9 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 			nOffsetPower = LANDING_POWER;	//landing power
 		}
 
-
+printf("--- 1\n");
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[4],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
+printf("--- 2\n");
 
 
 
@@ -325,7 +326,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 //		GetAttitudeControl(dfPower);//姿勢制御値獲得
 
-
+printf("--- 3\n");
 		//モータ出力
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
 		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement[4],m_AttitudeData.aay);
