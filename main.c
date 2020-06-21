@@ -973,7 +973,7 @@ static int SetPwmBalance(int nPwm1,int nPwm2)
 			break;
 		}
 
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement,0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
 //	    printf("VL53L0X:%dmm  pwm=%d\n", VL53L0X_Measurement,i);								//degbug地上高(mm)
 		if(i == 0)save=VL53L0X_Measurement;
 		if(save+7 < VL53L0X_Measurement){//7mm上昇したら
