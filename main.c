@@ -367,10 +367,28 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 //	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM, BETAFPV_F4_2S_AIO_ARM_OFF);
 //	sleep(1);	
 
-
-
 }
+/********************************************************************************
+*	障害物回避用のroll出力補正
+********************************************************************************/
+static int Roll_Power(uint16_t right,uint16_t left,uint16_t *status)
+{
+	switch(*status){
+		case 1:
+			if(right < 300){
+				*status = 2;
+				return -20;
+			}
+			break;
+		case 2:
+			break;
+		case 3:
+			break;
 
+	}
+	printf ("*** error Roll_Power(). status not found.");
+	return 0;
+}
 /********************************************************************************
 *	naze32用　メインループ
 ********************************************************************************/
