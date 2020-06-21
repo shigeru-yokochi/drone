@@ -328,6 +328,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
 
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + 10.0));		//pitch
+		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL - 10.0));		//roll
 
 
 		printf("OffsetPower:%d time %0.2lf VL53L0X(1..5):%4d %4d %4d %4d %4d aay:%d\n", nOffsetPower, dfFlightTime, 
