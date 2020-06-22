@@ -123,8 +123,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define	BETAFPV_F4_2S_AIO_NEUTRAL			1500
 #define	BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE	950
 #define THRESHOLD_DISTANCE 250	//障害物回避距離(mm)
-#define CORRECTION_POWER_P 150	//障害物回避用の出力補正値
-#define CORRECTION_POWER_N -150	//障害物回避用の出力補正値
+#define CORRECTION_POWER_P 100	//障害物回避用の出力補正値
+#define CORRECTION_POWER_N -100	//障害物回避用の出力補正値
 
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高(mm)
@@ -462,7 +462,7 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
 	switch(*status){
 		case 1:
 			if(event == 1){
-				*correction_power = 750;
+				*correction_power = 800;
 				*status = 2;
 			}
 			return true;
@@ -481,11 +481,11 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
 			return true;
 		case 3:
 			if(event == 2){
-				*correction_power = 750;
+				*correction_power = 800;
 				*status = 2;
 			}
 			if(event == 4){
-				*correction_power = 750;
+				*correction_power = 800;
 				*status = 4;
 			}
 			if(event == 5){
