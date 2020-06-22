@@ -288,7 +288,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		dfFlightTime = ((double)(tv_now.tv_usec) / 1000000) + tv_now.tv_sec - dfFlightTimeStart;
 //		printf("Flight time %0.6lf\n", dfFlightTime);
 		if (dfFlightTime > DEBUG_MAINLOOP_TO) {						//debug 指定秒で終了する
-			printf("--- stop. Debug Time out. [%dssec]\n", DEBUG_MAINLOOP_TO);
+			printf("--- stop. Debug Time out. [%dsec]\n", DEBUG_MAINLOOP_TO);
 			break;
 		}
 
