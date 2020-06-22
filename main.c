@@ -243,10 +243,11 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 //	int nOffsetPower = OFFSET_POWER;
 //	int nMode= 0;		//最大地上高検知:1
 //	int nSaveHeight = 0;
-	int correction_power = 0; //roll,pitch補正値
-	int altitude_event  = 1;  //高度制御イベント値
-	int altitude_status = 1;  //高度制御状態値
-	int altitude_power = 0;   //高度制御用出力値
+	int roll_power = 0; 		//roll補正値
+	int pitch_power = 0; 		//pitch補正値
+	int altitude_event  = 1;  	//高度制御イベント値
+	int altitude_status = 1;  	//高度制御状態値
+	int altitude_power = 0;   	//高度制御用出力値
 	struct timeval tv_start;
 	struct timeval tv_now;
 	double dfFlightTimeStart;
@@ -360,11 +361,11 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 		//モータ出力
 		//障害物回避用の出力補正値獲得(ROLL)
-		Get_Correction_Power(VL53L0X_Measurement[0],VL53L0X_Measurement[2],&correction_power);
-		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + correction_power));
+		Get_Correction_Power(VL53L0X_Measurement[0],VL53L0X_Measurement[2],&roll_power);
+		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + roll_power));
 		//障害物回避用の出力補正値獲得(PITCH)
-		Get_Correction_Power(VL53L0X_Measurement[3],VL53L0X_Measurement[1],&correction_power);
-		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + correction_power));
+		Get_Correction_Power(VL53L0X_Measurement[3],VL53L0X_Measurement[1],&pitch_power);
+		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + pitch_power));
 
 		//高度制御イベント値
 		altitude_event = Get_Altitude_Ctrl_Event(VL53L0X_Measurement[4],save_altitude);	
@@ -373,12 +374,13 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 
 
-		printf("Power:%d time %0.2lf VL53L0X(1..5):%4d %4d %4d %4d %4d aay:%d\n", altitude_power, dfFlightTime, 
+		printf("Power %d time %0.2lf VL53L0X(1..5): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d\n", altitude_power, dfFlightTime, 
 				VL53L0X_Measurement[0],
 				VL53L0X_Measurement[1],
 				VL53L0X_Measurement[2],
 				VL53L0X_Measurement[3],
-				VL53L0X_Measurement[4],m_AttitudeData.aay);
+				VL53L0X_Measurement[4]
+				roll_power,pitch_power);
 
 	}	//for()
 
