@@ -55,8 +55,8 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power);
 
 //障害物回避
 #define THRESHOLD_DISTANCE 300	//障害物回避距離(mm)
-#define CORRECTION_POWER_P 20	//障害物回避用の出力補正値
-#define CORRECTION_POWER_N -20	//障害物回避用の出力補正値
+#define CORRECTION_POWER_P 100	//障害物回避用の出力補正値
+#define CORRECTION_POWER_N -100	//障害物回避用の出力補正値
 
 
 //BLE BEACON
@@ -390,6 +390,7 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 	if(d1 < THRESHOLD_DISTANCE){
 		if(d2 < THRESHOLD_DISTANCE){
 			*correction_power = 0;
+			printf("+++ THRESHOLD_DISTANCE MINIMUM\n");
 			return false;
 		}
 		*correction_power = CORRECTION_POWER_N;
@@ -400,7 +401,6 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 		return true;
 	}
 	*correction_power = 0;
-	printf("+++ THRESHOLD_DISTANCE MINIMUM\n");
 	return true;
 }
 /********************************************************************************
