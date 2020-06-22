@@ -122,13 +122,13 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define BETAFPV_F4_2S_AIO_ARM_ON	1500
 #define	BETAFPV_F4_2S_AIO_NEUTRAL			1500
 #define	BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE	950
-#define THRESHOLD_DISTANCE 300	//障害物回避距離(mm)
-#define CORRECTION_POWER_P 100	//障害物回避用の出力補正値
-#define CORRECTION_POWER_N -100	//障害物回避用の出力補正値
+#define THRESHOLD_DISTANCE 250	//障害物回避距離(mm)
+#define CORRECTION_POWER_P 150	//障害物回避用の出力補正値
+#define CORRECTION_POWER_N -150	//障害物回避用の出力補正値
 
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高(mm)
-#define MAXIMUM_GROUND_CLEARANCE	700	//最大地上高(mm)
+#define MAXIMUM_GROUND_CLEARANCE	600	//最大地上高(mm)
 
 #define DEBUG_MAINLOOP_TO			4	//デバッグ用メインループタイムアウト指定(sec)
 #define FLIGHT_TIME					3	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
