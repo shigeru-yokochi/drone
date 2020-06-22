@@ -444,7 +444,7 @@ static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save)
 		return 4;
 	}
 	if(alt > MAXIMUM_GROUND_CLEARANCE){
-		retrun 3;
+		return 3;
 	}
 	return 2;
 }
@@ -466,7 +466,7 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
 				*status = 3;
 			}
 			if(event == 4){
-				*(correction_power+=20);
+				(*correction_power)+=20;
 			}
 			if(event == 5){
 				*correction_power = 400;
