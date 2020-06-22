@@ -422,7 +422,7 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 			return false;
 		}
 		//マイナス補正
-		*correction_power = CORRECTION_POWER_N;ß
+		*correction_power = CORRECTION_POWER_N;
 		return true;
 	}
 	//プラス補正
