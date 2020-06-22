@@ -395,7 +395,7 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 		*correction_power = CORRECTION_POWER_N;
 		return true;
 	}
-	if(d2 < THRESHOL_DISTANCE){
+	if(d2 < THRESHOLD_DISTANCE){
 		*correction_power = CORRECTION_POWER_P;
 		return true;
 	}
