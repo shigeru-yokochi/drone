@@ -440,8 +440,8 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 ********************************************************************************/
 static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save)
 {
-	//50mmを超えて下降検知
-	if(alt < alt_save+50){
+	//50mmを超えた下降検知
+	if(alt+50 < alt_save){
 		return 4;
 	}
 	if(alt > MAXIMUM_GROUND_CLEARANCE){
