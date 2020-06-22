@@ -127,11 +127,11 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define CORRECTION_POWER_N -100	//障害物回避用の出力補正値
 
 
-#define MINIMUM_GROUND_CLEARANCE	41	//最小地上高(mm)
+#define MINIMUM_GROUND_CLEARANCE	40	//最小地上高(mm)
 #define MAXIMUM_GROUND_CLEARANCE	700	//最大地上高(mm)
 
-#define DEBUG_MAINLOOP_TO			10	//デバッグ用メインループタイムアウト指定(sec)
-#define FLIGHT_TIME					8	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
+#define DEBUG_MAINLOOP_TO			4	//デバッグ用メインループタイムアウト指定(sec)
+#define FLIGHT_TIME					3	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
 #define OFFSET_POWER				700
 #define LANDING_POWER				500
 
@@ -295,13 +295,16 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 
 		if (dfFlightTime > FLIGHT_TIME) {
-//			nOffsetPower = LANDING_POWER;	//landing power
 			//ランディング開始
 			altitude_event = 5;
 			Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
 			//throttle
 			PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 		}
+
+
+
+
 
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 1
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[1],1) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 2
@@ -332,12 +335,12 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 //	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement[4]);								//degbug地上高(mm)
 //		DebugPrint(tmp,m_fpVL53L0X);													//debug用
 
-//		if (dfFlightTime >= 2.0) {
-//			if(VL53L0X_Measurement[4] < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
-//				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement[4],MINIMUM_GROUND_CLEARANCE);
-//				break;
-//			}
-//		}
+		if (dfFlightTime >= 2.0) {
+			if(VL53L0X_Measurement[4] < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
+				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement[4],MINIMUM_GROUND_CLEARANCE);
+				break;
+			}
+		}
 
 
 		//ジャイロ/加速度
