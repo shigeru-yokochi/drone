@@ -460,34 +460,34 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
 	switch(*status){
 		case 1:
 			if(event == 1){
-				*correction_power = 700;
+				*correction_power = 750;
 				*status = 2;
 			}
 			return true;
 		case 2:
 			if(event == 3){
-				*correction_power = 400;
+				*correction_power = 500;
 				*status = 3;
 			}
 			if(event == 4){
 				(*correction_power)+=20;
 			}
 			if(event == 5){
-				*correction_power = 400;
+				*correction_power = 500;
 				*status = 5;
 			}
 			return true;
 		case 3:
 			if(event == 2){
-				*correction_power = 700;
+				*correction_power = 750;
 				*status = 2;
 			}
 			if(event == 4){
-				*correction_power = 700;
+				*correction_power = 750;
 				*status = 4;
 			}
 			if(event == 5){
-				*correction_power = 400;
+				*correction_power = 500;
 				*status = 5;
 			}
 			return true;
@@ -496,7 +496,7 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
 				*status = 2;
 			}
 			if(event == 5){
-				*correction_power = 400;
+				*correction_power = 500;
 				*status = 5;
 			}
 			return true;
