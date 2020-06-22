@@ -379,7 +379,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 				VL53L0X_Measurement[1],
 				VL53L0X_Measurement[2],
 				VL53L0X_Measurement[3],
-				VL53L0X_Measurement[4]
+				VL53L0X_Measurement[4],
 				roll_power,pitch_power);
 
 	}	//for()
