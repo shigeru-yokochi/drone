@@ -52,12 +52,8 @@ void Landing(void);
 static void Naze32_Main_Loop(void);
 static void BETAFPV_F4_2S_AIO_Main_Loop(void);
 static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power);
-
-//障害物回避
-#define THRESHOLD_DISTANCE 300	//障害物回避距離(mm)
-#define CORRECTION_POWER_P 100	//障害物回避用の出力補正値
-#define CORRECTION_POWER_N -100	//障害物回避用の出力補正値
-
+static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save);
+static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power);
 
 //BLE BEACON
 #define BLE_BEACON_MAX	2	//1個使用 最大4個
@@ -122,15 +118,17 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define BETAFPV_F4_2S_AIO_AUX2		5
 #define BETAFPV_F4_2S_AIO_AUX3		6
 #define BETAFPV_F4_2S_AIO_AUX4		7
-
 #define BETAFPV_F4_2S_AIO_ARM_OFF	1000
 #define BETAFPV_F4_2S_AIO_ARM_ON	1500
 #define	BETAFPV_F4_2S_AIO_NEUTRAL			1500
 #define	BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE	950
+#define THRESHOLD_DISTANCE 300	//障害物回避距離(mm)
+#define CORRECTION_POWER_P 100	//障害物回避用の出力補正値
+#define CORRECTION_POWER_N -100	//障害物回避用の出力補正値
 
 
-#define MINIMUM_GROUND_CLEARANCE	41	//最小地上高
-#define MAXIMUM_GROUND_CLEARANCE	400	//最大地上高(できるだけ高くするmax500目標)
+#define MINIMUM_GROUND_CLEARANCE	41	//最小地上高(mm)
+#define MAXIMUM_GROUND_CLEARANCE	700	//最大地上高(mm)
 
 #define DEBUG_MAINLOOP_TO			10	//デバッグ用メインループタイムアウト指定(sec)
 #define FLIGHT_TIME					8	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
@@ -218,6 +216,10 @@ TAG_EXIT:
 	
 
 	VL53L0X_close(4);
+	VL53L0X_close(3);
+	VL53L0X_close(2);
+	VL53L0X_close(1);
+	VL53L0X_close(0);
 
 	Ble_close();
 
@@ -233,20 +235,23 @@ TAG_EXIT:
 static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 {
 	uint16_t VL53L0X_Measurement[VL53L0X_MAX];		//VL53L0X_MAX台分の測定値(mm)
-	char tmp[256];
+	uint16_t save_altitude = 0;						//前回の高度を保存
+//	char tmp[256];
 //	double dfPower[4];		//pwm1..4の個別用出力調整値
-	int nHeadPower[4];		//指定方向へ移動するための出力値
-	int nDirection;
-	int nOffsetPower = OFFSET_POWER;
-	int nMode= 0;		//最大地上高検知:1
-	int nSaveHeight = 0;
+//	int nHeadPower[4];		//指定方向へ移動するための出力値
+//	int nDirection;
+//	int nOffsetPower = OFFSET_POWER;
+//	int nMode= 0;		//最大地上高検知:1
+//	int nSaveHeight = 0;
 	int correction_power = 0; //roll,pitch補正値
-
+	int altitude_event  = 1;  //高度制御イベント値
+	int altitude_status = 1;  //高度制御状態値
+	int altitude_power = 0;   //高度制御用出力値
 	struct timeval tv_start;
 	struct timeval tv_now;
 	double dfFlightTimeStart;
 	double dfFlightTime;
-	double dfFlightTimeSave=0.;
+//	double dfFlightTimeSave=0.;
 
 
 	//BETAFPV_F4_2S_AIO init
@@ -268,6 +273,15 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 	//	printf("%ld %06lu\n", tv_start.tv_sec, tv_start.tv_usec);
 
 //	start_time = time(NULL);
+
+	//上昇開始
+	altitude_event = 1;
+	Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
+	//throttle
+	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
+
+
+
 	printf("--- started main loop.\n");
 	for(;;){
 		gettimeofday(&tv_now, NULL);		//now time
@@ -281,43 +295,49 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 
 		if (dfFlightTime > FLIGHT_TIME) {
-			nOffsetPower = LANDING_POWER;	//landing power
+//			nOffsetPower = LANDING_POWER;	//landing power
+			//ランディング開始
+			altitude_event = 5;
+			Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
+			//throttle
+			PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 		}
 
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 1
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[1],1) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 2
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[2],2) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 3
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[3],3) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 4
+		save_altitude = VL53L0X_Measurement[4];												//前回の高度を保存
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[4],4) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 5 高度
 
 		//最大地上高で静止させる
-		if (dfFlightTime <= FLIGHT_TIME) {
-			if (VL53L0X_Measurement[4] > MAXIMUM_GROUND_CLEARANCE) {
-				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement[4]){//降下を検知したら再上昇させる
-					nOffsetPower = OFFSET_POWER+20;
-					nMode= 0;	
-				}
-				else{
-					nMode= 1;	//最大地上高検知
-					nOffsetPower = LANDING_POWER;//降下開始
-					nSaveHeight = VL53L0X_Measurement[4];
-				}
-			}
-			else {
-				nOffsetPower = OFFSET_POWER;
-			}
-		}
+//		if (dfFlightTime <= FLIGHT_TIME) {
+//			if (VL53L0X_Measurement[4] > MAXIMUM_GROUND_CLEARANCE) {
+//				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement[4]){//降下を検知したら再上昇させる
+//					nOffsetPower = OFFSET_POWER+20;
+//					nMode= 0;	
+//				}
+//				else{
+//					nMode= 1;	//最大地上高検知
+//					nOffsetPower = LANDING_POWER;//降下開始
+//					nSaveHeight = VL53L0X_Measurement[4];
+//				}
+//			}
+//			else {
+//				nOffsetPower = OFFSET_POWER;
+//			}
+//		}
 
 
 //	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement[4]);								//degbug地上高(mm)
 //		DebugPrint(tmp,m_fpVL53L0X);													//debug用
 
-		if (dfFlightTime >= 2.0) {
-			if(VL53L0X_Measurement[4] < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
-				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement[4],MINIMUM_GROUND_CLEARANCE);
-				break;
-			}
-		}
+//		if (dfFlightTime >= 2.0) {
+//			if(VL53L0X_Measurement[4] < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
+//				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement[4],MINIMUM_GROUND_CLEARANCE);
+//				break;
+//			}
+//		}
 
 
 		//ジャイロ/加速度
@@ -330,6 +350,12 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 								m_fp);//MPU6050測定値獲得
 
 																				
+
+
+//		GetAttitudeControl(dfPower);//姿勢制御値獲得
+
+
+		//モータ出力
 		//障害物回避用の出力補正値獲得(ROLL)
 		Get_Correction_Power(VL53L0X_Measurement[0],VL53L0X_Measurement[2],&correction_power);
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + correction_power));
@@ -337,13 +363,14 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		Get_Correction_Power(VL53L0X_Measurement[3],VL53L0X_Measurement[1],&correction_power);
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + correction_power));
 
+		//高度制御イベント値
+		altitude_event = Get_Altitude_Ctrl_Event(VL53L0X_Measurement[4],save_altitude);	
+		Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
+		//throttle
+		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 
-//		GetAttitudeControl(dfPower);//姿勢制御値獲得
-		//モータ出力
-		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
 
-
-		printf("OffsetPower:%d time %0.2lf VL53L0X(1..5):%4d %4d %4d %4d %4d aay:%d\n", nOffsetPower, dfFlightTime, 
+		printf("Power:%d time %0.2lf VL53L0X(1..5):%4d %4d %4d %4d %4d aay:%d\n", altitude_power, dfFlightTime, 
 				VL53L0X_Measurement[0],
 				VL53L0X_Measurement[1],
 				VL53L0X_Measurement[2],
@@ -381,7 +408,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 }
 /********************************************************************************
-*	障害物回避用の出力補正値獲得
+*	障害物回避用の出力補正値獲得（ROLL補正とPITCH補正に使用する）
 * 進行方向の障害物との距離がTHRESHOLD_DISTANCE未満になった場合、進行方向を逆にする
 * 進行方向と進行逆方向とも障害物との距離がTHRESHOLD_DISTANCE未満になった場合、failになる
 ********************************************************************************/
@@ -389,19 +416,91 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 {
 	if(d1 < THRESHOLD_DISTANCE){
 		if(d2 < THRESHOLD_DISTANCE){
+			//補正不能
 			*correction_power = 0;
 			printf("+++ THRESHOLD_DISTANCE MINIMUM\n");
 			return false;
 		}
-		*correction_power = CORRECTION_POWER_N;
+		//マイナス補正
+		*correction_power = CORRECTION_POWER_N;ß
 		return true;
 	}
+	//プラス補正
 	if(d2 < THRESHOLD_DISTANCE){
 		*correction_power = CORRECTION_POWER_P;
 		return true;
 	}
+	//補正なし
 	*correction_power = 0;
 	return true;
+}
+/********************************************************************************
+*	高度制御イベント取得
+*  取得イベントは2,3,4
+********************************************************************************/
+static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save)
+{
+	if(alt < alt_save){
+		return 4;
+	}
+	if(alt > MAXIMUM_GROUND_CLEARANCE){
+		retrun 3;
+	}
+	return 2;
+}
+/********************************************************************************
+*	高度制御出力取得
+********************************************************************************/
+static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
+{
+	switch(*status){
+		case 1:
+			if(event == 1){
+				*correction_power = 700;
+				*status = 2;
+			}
+			return true;
+		case 2:
+			if(event == 3){
+				*correction_power = 400;
+				*status = 3;
+			}
+			if(event == 4){
+				*(correction_power+=20);
+			}
+			if(event == 5){
+				*correction_power = 400;
+				*status = 5;
+			}
+			return true;
+		case 3:
+			if(event == 2){
+				*correction_power = 700;
+				*status = 2;
+			}
+			if(event == 4){
+				*correction_power = 700;
+				*status = 4;
+			}
+			if(event == 5){
+				*correction_power = 400;
+				*status = 5;
+			}
+			return true;
+		case 4:
+			if(event == 2){
+				*status = 2;
+			}
+			if(event == 5){
+				*correction_power = 400;
+				*status = 5;
+			}
+			return true;
+		case 5:
+			return true;
+	}
+	printf("*** error Get_Altitude_Power() not status.[%d]\n",*status);
+	return false;
 }
 /********************************************************************************
 *	naze32用　メインループ
