@@ -123,8 +123,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define	BETAFPV_F4_2S_AIO_NEUTRAL			1500
 #define	BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE	950
 #define THRESHOLD_DISTANCE 250	//障害物回避距離(mm)
-#define CORRECTION_POWER_P 100	//障害物回避用の出力補正値
-#define CORRECTION_POWER_N -100	//障害物回避用の出力補正値
+#define CORRECTION_POWER_P 50	//障害物回避用の出力補正値
+#define CORRECTION_POWER_N -50	//障害物回避用の出力補正値
 
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高(mm)
@@ -462,34 +462,34 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
 	switch(*status){
 		case 1:
 			if(event == 1){
-				*correction_power = 800;
+				*correction_power = 780;
 				*status = 2;
 			}
 			return true;
 		case 2:
 			if(event == 3){
-				*correction_power = 500;
+				*correction_power = 600;
 				*status = 3;
 			}
 			if(event == 4){
 				(*correction_power)+=20;
 			}
 			if(event == 5){
-				*correction_power = 500;
+				*correction_power = 600;
 				*status = 5;
 			}
 			return true;
 		case 3:
 			if(event == 2){
-				*correction_power = 800;
+				*correction_power = 780;
 				*status = 2;
 			}
 			if(event == 4){
-				*correction_power = 800;
+				*correction_power = 780;
 				*status = 4;
 			}
 			if(event == 5){
-				*correction_power = 500;
+				*correction_power = 600;
 				*status = 5;
 			}
 			return true;
@@ -498,7 +498,7 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
 				*status = 2;
 			}
 			if(event == 5){
-				*correction_power = 500;
+				*correction_power = 600;
 				*status = 5;
 			}
 			return true;
