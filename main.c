@@ -51,6 +51,13 @@ void GetAttitudeControl(double *dfpPower);
 void Landing(void);
 static void Naze32_Main_Loop(void);
 static void BETAFPV_F4_2S_AIO_Main_Loop(void);
+static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power);
+
+//障害物回避
+#define THRESHOLD_DISTANCE 300	//障害物回避距離(mm)
+#define CORRECTION_POWER_P 20	//障害物回避用の出力補正値
+#define CORRECTION_POWER_N -20	//障害物回避用の出力補正値
+
 
 //BLE BEACON
 #define BLE_BEACON_MAX	2	//1個使用 最大4個
@@ -233,6 +240,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 	int nOffsetPower = OFFSET_POWER;
 	int nMode= 0;		//最大地上高検知:1
 	int nSaveHeight = 0;
+	int correction_power = 0; //roll,pitch補正値
 
 	struct timeval tv_start;
 	struct timeval tv_now;
@@ -322,13 +330,17 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 								m_fp);//MPU6050測定値獲得
 
 																				
+		//障害物回避用の出力補正値獲得(ROLL)
+		Get_Correction_Power(VL53L0X_Measurement[0],VL53L0X_Measurement[2],&correction_power);
+		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + correction_power));
+		//障害物回避用の出力補正値獲得(PITCH)
+		Get_Correction_Power(VL53L0X_Measurement[3],VL53L0X_Measurement[1],&correction_power);
+		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + correction_power));
+
 
 //		GetAttitudeControl(dfPower);//姿勢制御値獲得
 		//モータ出力
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-
-		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + 10.0));		//pitch
-		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL - 10.0));		//roll
 
 
 		printf("OffsetPower:%d time %0.2lf VL53L0X(1..5):%4d %4d %4d %4d %4d aay:%d\n", nOffsetPower, dfFlightTime, 
@@ -369,25 +381,27 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 }
 /********************************************************************************
-*	障害物回避用のroll出力補正
+*	障害物回避用の出力補正値獲得
+* 進行方向の障害物との距離がTHRESHOLD_DISTANCE未満になった場合、進行方向を逆にする
+* 進行方向と進行逆方向とも障害物との距離がTHRESHOLD_DISTANCE未満になった場合、failになる
 ********************************************************************************/
-static int Roll_Power(uint16_t right,uint16_t left,uint16_t *status)
+static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 {
-	switch(*status){
-		case 1:
-			if(right < 300){
-				*status = 2;
-				return -20;
-			}
-			break;
-		case 2:
-			break;
-		case 3:
-			break;
-
+	if(d1 < THRESHOLD_DISTANCE){
+		if(d2 < THRESHOLD_DISTANCE){
+			*correction_power = 0;
+			return false;
+		}
+		*correction_power = CORRECTION_POWER_N;
+		return true;
 	}
-	printf ("*** error Roll_Power(). status not found.");
-	return 0;
+	if(d2 < THRESHOL_DISTANCE){
+		*correction_power = CORRECTION_POWER_P;
+		return true;
+	}
+	*correction_power = 0;
+	printf("+++ THRESHOLD_DISTANCE MINIMUM\n");
+	return true;
 }
 /********************************************************************************
 *	naze32用　メインループ
