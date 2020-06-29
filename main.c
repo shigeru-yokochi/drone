@@ -342,39 +342,31 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 //		GetAttitudeControl(dfPower);//姿勢制御値獲得
 
 
-		//モータ出力
+
+
 		//障害物回避用の出力補正値獲得(ROLL)
 		Get_Correction_Power(VL53L0X_Measurement[0],VL53L0X_Measurement[2],&roll_power);
+		//姿勢を水平に近づける出力補正値獲得（ROLL）
+		if(roll_power == 0){
+			Get_Horizontal_Level_Power(m_AttitudeData.roll,&roll_power);
+		}
+		//モータ出力(ROLL)
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + roll_power));
+
 		//障害物回避用の出力補正値獲得(PITCH)
 		Get_Correction_Power(VL53L0X_Measurement[3],VL53L0X_Measurement[1],&pitch_power);
+		//姿勢を水平に近づける出力補正値獲得（PITCH）
+		if(pitch_power == 0){
+			Get_Horizontal_Level_Power(m_AttitudeData.pitch,&pitch_power);
+		}
+		//モータ出力(PITCH)
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + pitch_power));
 
 		//高度制御イベント値
 		altitude_event = Get_Altitude_Ctrl_Event(VL53L0X_Measurement[4],save_altitude);	
 		Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
-		//throttle
+		//モータ出力(throttle)
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
-
-		//姿勢を水平方向に近づける
-		if(roll_power == 0){
-			if(m_AttitudeData.roll > 2){
-				PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + 10));
-			}
-			if(m_AttitudeData.roll < 2){
-				PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL - 10));
-			}
-		}
-		//姿勢を水平方向に近づける
-		if(pitch_power == 0){
-			if(m_AttitudeData.roll > 2){
-				PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + 10));
-			}
-			if(m_AttitudeData.roll < 2){
-				PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL - 10));
-			}
-		}
-
 
 
 		printf("Power %d time %0.2lf VL53L0X(1..5): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d MPU6050(yaw,pitch,roll) %4.2lf %4.2lf %4.2lf\n", 
@@ -445,6 +437,21 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 	//補正なし
 	*correction_power = 0;
 	return true;
+}
+/********************************************************************************
+*	姿勢を水平に近づける出力補正値獲得（ROLL補正とPITCH補正に使用する）
+********************************************************************************/
+static void Get_Horizontal_Level_Power(float val,int *correction_power)
+{
+	if(val < 2){
+		*correction_power= -10;
+		return ;
+	}
+	if(val > 2){
+		*correction_power= 10;
+		return ;
+	}
+	*correction_power = 0;
 }
 /********************************************************************************
 *	高度制御イベント取得
