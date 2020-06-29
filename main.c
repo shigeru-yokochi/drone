@@ -50,6 +50,7 @@ void GetAttitudeControl(double *dfpPower);
 static void BETAFPV_F4_2S_AIO_Main_Loop(void);
 static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power);
 static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save);
+static void Get_Horizontal_Level_Power(float val,int *correction_power);
 static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power);
 
 //BLE BEACON
