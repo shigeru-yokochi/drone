@@ -115,8 +115,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高(mm)
 #define MAXIMUM_GROUND_CLEARANCE	600	//最大地上高(mm)
 
-#define DEBUG_MAINLOOP_TO			4	//デバッグ用メインループタイムアウト指定(sec)
-#define FLIGHT_TIME					3	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
+#define DEBUG_MAINLOOP_TO			5	//デバッグ用メインループタイムアウト指定(sec)
+#define FLIGHT_TIME					4	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
 #define CLIMB_POWER 780
 #define LANDING_POWER 600
 
@@ -327,10 +327,10 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		}
 
 
-		//ジャイロ/加速度
+		//ジャイロ/加速度(+90度で設置しているのでrollとpitchを逆にしている)
 		MPU6050_GetMeasurements(&m_AttitudeData.yaw,
-								&m_AttitudeData.pitch,
 								&m_AttitudeData.roll,
+								&m_AttitudeData.pitch,
 								&m_AttitudeData.aax,
 								&m_AttitudeData.aay,
 								&m_AttitudeData.aaz,
@@ -355,6 +355,26 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
 		//throttle
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
+
+		//姿勢を水平方向に近づける
+		if(roll_power == 0){
+			if(m_AttitudeData.roll > 2){
+				PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + 10));
+			}
+			if(m_AttitudeData.roll < 2){
+				PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL - 10));
+			}
+		}
+		//姿勢を水平方向に近づける
+		if(pitch_power == 0){
+			if(m_AttitudeData.roll > 2){
+				PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + 10));
+			}
+			if(m_AttitudeData.roll < 2){
+				PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL - 10));
+			}
+		}
+
 
 
 		printf("Power %d time %0.2lf VL53L0X(1..5): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d MPU6050(yaw,pitch,roll) %4.2lf %4.2lf %4.2lf\n", 
