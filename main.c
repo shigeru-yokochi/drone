@@ -370,7 +370,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 
 
-		printf("Power %d time %0.2lf VL53L0X(1..5): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d MPU6050(yaw,pitch,roll) %4.2lf %4.2lf %4.2lf\n", 
+		printf("Power %d time %0.2lf VL53L0X(1..5): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d MPU6050(yaw,roll,pitch) %4.2lf %4.2lf %4.2lf\n", 
 				altitude_power, 
 				dfFlightTime, 
 				VL53L0X_Measurement[0],
@@ -380,7 +380,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 				VL53L0X_Measurement[4],
 				roll_power,
 				pitch_power,
-				m_AttitudeData.yaw,m_AttitudeData.pitch,m_AttitudeData.roll);
+				m_AttitudeData.yaw,m_AttitudeData.roll,m_AttitudeData.pitch);
 
 	}	//for()
 
@@ -444,7 +444,7 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 ********************************************************************************/
 static void Get_Horizontal_Level_Power(float val,int *correction_power)
 {
-	if(val < 2){
+	if(val < -2){
 		*correction_power= -10;
 		return ;
 	}
