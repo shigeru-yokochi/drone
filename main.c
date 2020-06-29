@@ -41,15 +41,12 @@ extern int HMC5883L_GetDirection(void);
 //main.c
 static int I2c_device_init(void);
 static int Debug_Print_init(void);
-static void Loop(void);
 static void DebugPrint(char *buf,FILE *fp);
 static void BLHeli_init(void);
 static int SetPwmBalance(int nPwm1,int nPwm2);
 static int PwmBarance(void);
 static void HeadNorth(int nDirection, int *npPower1, int *npPower2, int *npPower3, int *npPower4);
 void GetAttitudeControl(double *dfpPower);
-void Landing(void);
-static void Naze32_Main_Loop(void);
 static void BETAFPV_F4_2S_AIO_Main_Loop(void);
 static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power);
 static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save);
@@ -94,19 +91,7 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define PWM_BASE_POWER	240	//test
 //#define PWM_POWER	0.2
 
-//NAZE32
-#define	NAZE32_NEUTRAL			1563
-#define	NAZE32_NEUTRAL_THROTTLE	950
-#define	NAZE32_ARM_OFF			1000
-#define	NAZE32_ARM_ON			1563
-#define	NAZE32_BARO_OFF			1000
-#define	NAZE32_BARO_ON			1563
-#define NAZE32_ROLL				0
-#define NAZE32_PITCH			1
-#define NAZE32_YAW				2
-#define NAZE32_THROTTLE			3
-#define NAZE32_ARM				4
-#define NAZE32_BARO				5
+
 
 //BETAFPV F4 2S AIO Brushless No Rx
 #define BETAFPV_F4_2S_AIO_ROLL		0
@@ -132,8 +117,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 
 #define DEBUG_MAINLOOP_TO			4	//デバッグ用メインループタイムアウト指定(sec)
 #define FLIGHT_TIME					3	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
-#define OFFSET_POWER				700
-#define LANDING_POWER				500
+#define CLIMB_POWER 780
+#define LANDING_POWER 600
 
 
 //姿勢制御用データ格納用
@@ -201,8 +186,6 @@ int main(int argc, char **argv)
 
 	printf("DELTA_T=%0.4lf\nPKp=%0.4lf\nPKi=%0.4lf\nPKd=%0.4lf\n\PWM_BASE_POWER=%d\n",DELTA_T,P_KP,P_KI,P_KD, PWM_BASE_POWER);
 
-//	Loop();								//メインループ
-//	Naze32_Main_Loop();
 	BETAFPV_F4_2S_AIO_Main_Loop();
 TAG_EXIT:
 	//終了処理
@@ -462,34 +445,34 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
 	switch(*status){
 		case 1:
 			if(event == 1){
-				*correction_power = 780;
+				*correction_power = CLIMB_POWER;
 				*status = 2;
 			}
 			return true;
 		case 2:
 			if(event == 3){
-				*correction_power = 600;
+				*correction_power = LANDING_POWER;
 				*status = 3;
 			}
 			if(event == 4){
 				(*correction_power)+=20;
 			}
 			if(event == 5){
-				*correction_power = 600;
+				*correction_power = LANDING_POWER;
 				*status = 5;
 			}
 			return true;
 		case 3:
 			if(event == 2){
-				*correction_power = 780;
+				*correction_power = CLIMB_POWER;
 				*status = 2;
 			}
 			if(event == 4){
-				*correction_power = 780;
+				*correction_power = CLIMB_POWER;
 				*status = 4;
 			}
 			if(event == 5){
-				*correction_power = 600;
+				*correction_power = LANDING_POWER;
 				*status = 5;
 			}
 			return true;
@@ -498,7 +481,7 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
 				*status = 2;
 			}
 			if(event == 5){
-				*correction_power = 600;
+				*correction_power = LANDING_POWER;
 				*status = 5;
 			}
 			return true;
@@ -507,453 +490,6 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
 	}
 	printf("*** error Get_Altitude_Power() not status.[%d]\n",*status);
 	return false;
-}
-/********************************************************************************
-*	naze32用　メインループ
-********************************************************************************/
-static void Naze32_Main_Loop(void)
-{
-	uint16_t VL53L0X_Measurement;		//測定値(mm)
-	char tmp[256];
-//	double dfPower[4];		//pwm1..4の個別用出力調整値
-	int nHeadPower[4];		//指定方向へ移動するための出力値
-	int nDirection;
-	int nOffsetPower = OFFSET_POWER;
-	int nMode= 0;		//最大地上高検知:1
-	int nSaveHeight = 0;
-
-	struct timeval tv_start;
-	struct timeval tv_now;
-	double dfFlightTimeStart;
-	double dfFlightTime;
-	double dfFlightTimeSave=0.;
-
-
-	//naze32 init
-	PCA9685_pwmWrite(NAZE32_ROLL	, NAZE32_NEUTRAL);
-	PCA9685_pwmWrite(NAZE32_PITCH	, NAZE32_NEUTRAL);
-	PCA9685_pwmWrite(NAZE32_YAW		, NAZE32_NEUTRAL);
-	PCA9685_pwmWrite(NAZE32_THROTTLE, NAZE32_NEUTRAL_THROTTLE);
-	PCA9685_pwmWrite(NAZE32_ARM		, NAZE32_ARM_OFF);
-	PCA9685_pwmWrite(NAZE32_BARO	, NAZE32_BARO_OFF);
-	sleep(1);
-
-	printf("--- arming start\n");
-	PCA9685_pwmWrite(NAZE32_ARM, NAZE32_ARM_ON);
-//	sleep(1);
-
-//	printf("--- thottle test1 start\n");
-//	PCA9685_pwmWrite(NAZE32_THROTTLE, NAZE32_NEUTRAL_THROTTLE + 600);
-//	sleep(2);
-
-//	printf("--- thottle test2 start\n");
-//	PCA9685_pwmWrite(NAZE32_THROTTLE, NAZE32_NEUTRAL_THROTTLE + 400);
-//	sleep(1);
-
-//	PCA9685_pwmWrite(NAZE32_THROTTLE, NAZE32_NEUTRAL_THROTTLE);
-//	sleep(1);
-//	printf("--- thottle test done!\n");
-
-
-
-
-
-
-
-
-	memset(&m_AttitudeData, 0, sizeof(m_AttitudeData));//初期化
-
-//	dfPower[0]=0.;
-//	dfPower[1]=0.;
-//	dfPower[2]=0.;
-//	dfPower[3]=0.;
-
-
-
-
-	gettimeofday(&tv_start, NULL);		//start time
-	dfFlightTimeStart = ((double)(tv_start.tv_usec) / 1000000) + tv_start.tv_sec;
-	//	printf("%ld %06lu\n", tv_start.tv_sec, tv_start.tv_usec);
-
-//	start_time = time(NULL);
-	printf("--- started main loop.\n");
-	for(;;){
-		gettimeofday(&tv_now, NULL);		//now time
-		dfFlightTime = ((double)(tv_now.tv_usec) / 1000000) + tv_now.tv_sec - dfFlightTimeStart;
-//		printf("Flight time %0.6lf\n", dfFlightTime);
-		if (dfFlightTime > DEBUG_MAINLOOP_TO) {						//debug 指定秒で終了する
-			printf("--- stop. Debug Time out. [%0.0lfs]\n", DEBUG_MAINLOOP_TO);
-			break;
-		}
-
-
-
-		if (dfFlightTime > FLIGHT_TIME) {
-			nOffsetPower = LANDING_POWER;	//landing power
-		}
-
-
-		//シナリオ：1秒上昇して2秒高度維持する。throttle 1s on -> baro on -> throttle off -> flight time out(landing)
-
-/*
-
-		if ((dfFlightTime - dfFlightTimeSave) >= 0.1) {	//0.1秒単位で処理を実行する
-			dfFlightTimeSave = dfFlightTime;
-
-			if (dfFlightTime > 2) {		//2秒超えた時の処理をここに書く
-				PCA9685_pwmWrite(NAZE32_BARO	, NAZE32_BARO_ON);
-	
-//				nOffsetPower = LANDING_POWER;
-			}
-//			printf("--- Flight time:%0.6lf nOffsetPower:%d\n", dfFlightTime, nOffsetPower);
-		}
-
-*/
-
-
-//		if(difftime(time(NULL), start_time) > DEBUG_MAINLOOP_TO){						//debug 指定秒で終了する
-//			printf("--- stop. Debug Time out. [%0.0lfs]\n",DEBUG_MAINLOOP_TO);
-//			break;
-//		}
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement,0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
-
-
-
-
-		//最大地上高で静止させる
-		if (dfFlightTime <= FLIGHT_TIME) {
-			if (VL53L0X_Measurement > MAXIMUM_GROUND_CLEARANCE) {
-				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement){//降下を検知したら再上昇させる
-					nOffsetPower = OFFSET_POWER+20;
-					nMode= 0;	
-				}
-				else{
-					nMode= 1;	//最大地上高検知
-					PCA9685_pwmWrite(NAZE32_BARO	, NAZE32_BARO_ON);
-					nOffsetPower = LANDING_POWER;//降下開始
-					nSaveHeight = VL53L0X_Measurement;
-				}
-			}
-			else {
-				nOffsetPower = OFFSET_POWER;
-			}
-		}
-
-
-
-
-
-
-//	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement);								//degbug地上高(mm)
-//		DebugPrint(tmp,m_fpVL53L0X);													//debug用
-
-		if (dfFlightTime >= 2.0) {
-			if(VL53L0X_Measurement < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
-				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement,MINIMUM_GROUND_CLEARANCE);
-				break;
-			}
-		}
-
-
-		//ジャイロ/加速度
-		MPU6050_GetMeasurements(&m_AttitudeData.yaw,
-								&m_AttitudeData.pitch,
-								&m_AttitudeData.roll,
-								&m_AttitudeData.aax,
-								&m_AttitudeData.aay,
-								&m_AttitudeData.aaz,
-								m_fp);//MPU6050測定値獲得
-
-																				
-
-//		GetAttitudeControl(dfPower);//姿勢制御値獲得
-
-
-		//モータ出力
-		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement,m_AttitudeData.aay);
-
-	}	//for()
-
-
-	gettimeofday(&tv_now, NULL);		//now time
-	dfFlightTime = ((double)(tv_now.tv_usec) / 1000000) + tv_now.tv_sec - dfFlightTimeStart;
-	printf("Flight time %0.6lf\n", dfFlightTime);
-
-
-
-//	printf("--- baro test start\n");
-//	PCA9685_pwmWrite(NAZE32_BARO, NAZE32_BARO_ON);
-//	sleep(1);
-//	printf("--- baro test stop\n");
-//	PCA9685_pwmWrite(NAZE32_BARO, NAZE32_BARO_OFF);
-
-
-	printf("--- arming stop!\n");
-	PCA9685_pwmWrite(NAZE32_ARM, NAZE32_ARM_OFF);
-	sleep(1);	
-
-}
-/********************************************************************************
-*	ループ
-********************************************************************************/
-static void Loop(void)
-{
-	uint16_t VL53L0X_Measurement;		//測定値(mm)
-//	int nPitchPwmP,nPitchPwmN,nRollPwmP,nRollPwmN,nPwm[4],nPwmBasePower;
-//	float yaw=0.,pitch=0.,roll=0.,pre_pitch =-9999.,pre_roll = -9999.;
-	char tmp[256];
-	double dfPower[4];		//pwm1..4の個別用出力調整値
-//	time_t	start_time;
-	int nHeadPower[4];		//指定方向へ移動するための出力値
-	int nDirection;
-//	int nOffsetPower=550;
-	int nOffsetPower = OFFSET_POWER;
-	//	int flight_time;
-//	int nAAx, nAAy, nAAz;
-	int nMode= 0;		//最大地上高検知:1
-	int nSaveHeight = 0;
-
-
-
-	struct timeval tv_start;
-	struct timeval tv_now;
-	double dfFlightTimeStart;
-	double dfFlightTime;
-	double dfFlightTimeSave=0.;
-
-
-	memset(&m_AttitudeData, 0, sizeof(m_AttitudeData));//初期化
-
-	dfPower[0]=0.;
-	dfPower[1]=0.;
-	dfPower[2]=0.;
-	dfPower[3]=0.;
-
-
-
-
-	gettimeofday(&tv_start, NULL);		//start time
-	dfFlightTimeStart = ((double)(tv_start.tv_usec) / 1000000) + tv_start.tv_sec;
-	//	printf("%ld %06lu\n", tv_start.tv_sec, tv_start.tv_usec);
-
-//	start_time = time(NULL);
-	printf("--- started main loop.\n");
-	for(;;){
-		gettimeofday(&tv_now, NULL);		//now time
-		dfFlightTime = ((double)(tv_now.tv_usec) / 1000000) + tv_now.tv_sec - dfFlightTimeStart;
-//		printf("Flight time %0.6lf\n", dfFlightTime);
-		if (dfFlightTime > DEBUG_MAINLOOP_TO) {						//debug 指定秒で終了する
-			printf("--- stop. Debug Time out. [%0.0lfs]\n", DEBUG_MAINLOOP_TO);
-			break;
-		}
-
-
-
-		if (dfFlightTime > FLIGHT_TIME) {
-			nOffsetPower = LANDING_POWER;	//landing power
-		}
-
-/*
-		if ((dfFlightTime - dfFlightTimeSave) >= 0.1) {	//0.1秒単位で処理を実行する
-			dfFlightTimeSave = dfFlightTime;
-
-			if (dfFlightTime < 3) {		//3秒までの処理はここに書く
-//			if ((((int)dfFlightTime) %10) < 5) {		//5秒ごとにUP-DOWNする
-					if (nOffsetPower < 500) {
-					nOffsetPower += 10;
-				}
-			}
-			else  {
-				if (nOffsetPower > 0) {
-					nOffsetPower -= 10;
-				}
-			}
-
-
-
-			printf("--- Flight time:%0.6lf nOffsetPower:%d\n", dfFlightTime, nOffsetPower);
-		}
-
-*/
-
-
-//		if(difftime(time(NULL), start_time) > DEBUG_MAINLOOP_TO){						//debug 指定秒で終了する
-//			printf("--- stop. Debug Time out. [%0.0lfs]\n",DEBUG_MAINLOOP_TO);
-//			break;
-//		}
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement,0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
-
-
-/*
-		//最大地上高で静止させる
-		if (dfFlightTime <= FLIGHT_TIME) {
-			if (VL53L0X_Measurement > MAXIMUM_GROUND_CLEARANCE) {
-				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement){//降下を検知したら再上昇させる
-					nOffsetPower = OFFSET_POWER+20;
-					nMode= 0;	
-				}
-				else{
-					nMode= 1;	//最大地上高検知
-					nOffsetPower = LANDING_POWER;//降下開始
-					nSaveHeight = VL53L0X_Measurement;
-				}
-			}
-			else {
-				nOffsetPower = OFFSET_POWER;
-			}
-		}
-*/
-
-//	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement);								//degbug地上高(mm)
-//		DebugPrint(tmp,m_fpVL53L0X);													//debug用
-
-		if (dfFlightTime >= 2.0) {
-			if(VL53L0X_Measurement < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
-				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement,MINIMUM_GROUND_CLEARANCE);
-				break;
-			}
-		}
-
-//		BleRSSI();	//BLE RSSI獲得
-
-//↓一旦中止　加速度を使ってみる
-//dfPower[1] = GetPIDPitch(pitch,0.);	//PID制御	pich
-//dfPower[0] = GetPIDPitch(roll,0.);	//PID制御	roll
-//printf("pich:pid\t%02.2lf\t%02.2lf\troll:pid\t%02.2lf\t%02.2lf\n",  pitch, dfPower[0],roll,dfPower[0]);
-
-
-
-
-		if(m_AttitudeData.pitch > 60 || m_AttitudeData.pitch < -60){
-			printf("*** over pitch stop!!!\n");
-			break;
-		}
-		if(m_AttitudeData.roll > 60 || m_AttitudeData.roll < -60){
-			printf("*** over rool stop!!!\n");
-			break;
-		}
-
-		//ジャイロ/加速度
-		MPU6050_GetMeasurements(&m_AttitudeData.yaw,
-								&m_AttitudeData.pitch,
-								&m_AttitudeData.roll,
-								&m_AttitudeData.aax,
-								&m_AttitudeData.aay,
-								&m_AttitudeData.aaz,
-								m_fp);//MPU6050測定値獲得
-
-																				
-
-		GetAttitudeControl(dfPower);//姿勢制御値獲得
-
-	
-
-//		DebugPrint(tmp,m_fp);												//debug
-
-
-
-
-//コンパス検証ここから
-//		nDirection = HMC5883L_GetDirection();		//コンパス(北:0)
-////		nDirection += 90;							//西:0にする
-////		nDirection -= 90;							//東:0にする
-//		if (nDirection < 0)nDirection += 360;
-//		if (nDirection >= 360)nDirection -= 360;
-//		memset(nHeadPower, 0, sizeof(nHeadPower));
-//		HeadNorth(nDirection, &nHeadPower[0], &nHeadPower[1], &nHeadPower[2], &nHeadPower[3]);//北に向かう
-//		printf("(%d)%d %d %d %d\n", nDirection,nHeadPower[0], nHeadPower[1], nHeadPower[2], nHeadPower[3]);
-//コンパス検証ここまで
-
-
-//dfPower[1] pitch 制御　-----> ここから
-//		if(pre_pitch == -9999)pre_pitch = pitch;	//初回
-//
-//		if(pitch > 1){	
-//			if(pitch-pre_pitch > 10){//前回とのpitchの差が大きい場合はpwmを下げる　初回は無効にする！！
-//				printf("--- down!!\n");
-//				dfPower[1]-=10;   //減速
-//			}
-//			else   if(pre_pitch-pitch <= 0 ){
-//				if(pitch > 20){
-//					dfPower[1]+=1;   //プラスしたのに上昇していないのでさらにプラスする
-//				}
-//				else{
-//	    	        dfPower[1]+=0.1;   //水平付近は慎重にやる
-//				}
-//			}
-//
-//		}
-//
-//		if(pitch < -1){	
-//			if(pitch - pre_pitch < -10){//前回とのpitchの差が大きい場合はpwmを上げる　　初回は無効にする！！
-//				dfPower[1]+=10;   //加速
-//				printf("--- up!!\n");
-//			}
-//			else  if(pre_pitch-pitch >= 0 ){
-//				if(pitch < -20 ){
-//					dfPower[1]-=1;   //マイナスしたのに下降していないのでさらにマイナスする
-//				}
-//				else{
-//		          dfPower[1]-=0.1;   //水平付近は慎重にやる
-//				}
-//			}
-//		}
-//
-//		pre_pitch=pitch;
-//<----ここまで
-
-
-
-
-		//モータ出力
-		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement,m_AttitudeData.aay);
-//		PCA9685_pwmWrite(0, (double)(PWM_MIN + PWM_BASE_POWER + dfPower[0] + nOffsetPower));
-//		PCA9685_pwmWrite(1, (double)(PWM_MIN + PWM_BASE_POWER + dfPower[1] + nOffsetPower));
-//		PCA9685_pwmWrite(2, (double)(PWM_MIN + PWM_BASE_POWER + dfPower[2] + nOffsetPower));
-//		PCA9685_pwmWrite(3, (double)(PWM_MIN + PWM_BASE_POWER + dfPower[3] + nOffsetPower));
-
-	}	//for()
-
-
-	gettimeofday(&tv_now, NULL);		//now time
-	dfFlightTime = ((double)(tv_now.tv_usec) / 1000000) + tv_now.tv_sec - dfFlightTimeStart;
-	printf("Flight time %0.6lf\n", dfFlightTime);
-
-
-}
-/*****************************************************************
-*	着陸
-******************************************************************/
-void Landing(void)
-{
-	struct timeval tv_start;
-	struct timeval tv_now;
-	double dfFlightTimeStart;
-	double dfFlightTime;
-	double dfFlightTimeSave=0.;
-
-
-
-	gettimeofday(&tv_start, NULL);		//start time
-	dfFlightTimeStart = ((double)(tv_start.tv_usec) / 1000000) + tv_start.tv_sec;
-	printf("--- Landing started %ld %06lu\n", tv_start.tv_sec, tv_start.tv_usec);
-
-	for(;;){
-		gettimeofday(&tv_now, NULL);		//now time
-		dfFlightTime = ((double)(tv_now.tv_usec) / 1000000) + tv_now.tv_sec - dfFlightTimeStart;
-		if ((dfFlightTime - dfFlightTimeSave) >= 0.1) {	//0.1秒単位で処理を実行する
-			dfFlightTimeSave = dfFlightTime;
-			printf("%ld %06lu\n", tv_start.tv_sec, tv_start.tv_usec);
-
-		}
-	}
-	printf("--- Landing finished %ld %06lu\n", tv_start.tv_sec, tv_start.tv_usec);
-	
-
-
-
 }
 
 /*****************************************************************
