@@ -337,9 +337,6 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 								&m_AttitudeData.aaz,
 								m_fp);//MPU6050測定値獲得
 
-																				
-
-
 //		GetAttitudeControl(dfPower);//姿勢制御値獲得
 
 
@@ -349,7 +346,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		Get_Correction_Power(VL53L0X_Measurement[0],VL53L0X_Measurement[2],&roll_power);
 		//姿勢を水平に近づける出力補正値獲得（ROLL）
 		if(roll_power == 0){
-			Get_Horizontal_Level_Power(m_AttitudeData.roll,&roll_power);
+			Get_Horizontal_Level_Power(m_AttitudeData.roll-3,&roll_power);
 		}
 		//モータ出力(ROLL)
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + roll_power));
@@ -358,7 +355,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		Get_Correction_Power(VL53L0X_Measurement[3],VL53L0X_Measurement[1],&pitch_power);
 		//姿勢を水平に近づける出力補正値獲得（PITCH）
 		if(pitch_power == 0){
-			Get_Horizontal_Level_Power(m_AttitudeData.pitch,&pitch_power);
+			Get_Horizontal_Level_Power(m_AttitudeData.pitch+4,&pitch_power);
 		}
 		//モータ出力(PITCH)
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + pitch_power));
