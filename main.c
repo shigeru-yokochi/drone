@@ -420,7 +420,7 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 		if(d2 < THRESHOLD_DISTANCE){
 			//補正不能
 			*correction_power = 0;
-			printf("+++ THRESHOLD_DISTANCE MINIMUM\n");
+			//printf("+++ THRESHOLD_DISTANCE MINIMUM\n");
 			return false;
 		}
 		//マイナス補正
