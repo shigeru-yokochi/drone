@@ -445,11 +445,11 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 static void Get_Horizontal_Level_Power(float val,int *correction_power)
 {
 	if(val < -2){
-		*correction_power= -10;
+		*correction_power= -20;
 		return ;
 	}
 	if(val > 2){
-		*correction_power= 10;
+		*correction_power= 20;
 		return ;
 	}
 	*correction_power = 0;
