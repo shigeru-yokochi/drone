@@ -43,7 +43,7 @@ static void HeadNorth(int nDirection, int *npPower1, int *npPower2, int *npPower
 void GetAttitudeControl(double *dfpPower);
 void Landing(void);
 static void Naze32_Main_Loop(void);
-static void BETAFPV_F4_2S_AIO_Main_Loop(void);
+
 
 //BLE BEACON
 #define BLE_BEACON_MAX	2	//1個使用 最大4個
@@ -96,23 +96,7 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define NAZE32_YAW				2
 #define NAZE32_THROTTLE			3
 #define NAZE32_ARM				4
-#define NAZE32_BARO				5
-
-//BETAFPV F4 2S AIO Brushless No Rx
-#define BETAFPV_F4_2S_AIO_THROTTLE	0
-#define BETAFPV_F4_2S_AIO_ROLL		1
-#define BETAFPV_F4_2S_AIO_PITCH		2
-#define BETAFPV_F4_2S_AIO_YAW		3
-#define BETAFPV_F4_2S_AIO_AUX2		4
-#define BETAFPV_F4_2S_AIO_ARM		4	//aux2
-#define BETAFPV_F4_2S_AIO_AUX3		5
-#define BETAFPV_F4_2S_AIO_AUX4		6
-#define BETAFPV_F4_2S_AIO_ARM_OFF	1000
-#define BETAFPV_F4_2S_AIO_ARM_ON	1500
-#define	BETAFPV_F4_2S_AIO_NEUTRAL			1519
-#define	BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE	950
-
-
+#define NAZE32_BARO				15
 
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高
@@ -186,8 +170,8 @@ int main(int argc, char **argv)
 	printf("DELTA_T=%0.4lf\nPKp=%0.4lf\nPKi=%0.4lf\nPKd=%0.4lf\n\PWM_BASE_POWER=%d\n",DELTA_T,P_KP,P_KI,P_KD, PWM_BASE_POWER);
 
 //	Loop();								//メインループ
-//	Naze32_Main_Loop();
-	BETAFPV_F4_2S_AIO_Main_Loop();
+	Naze32_Main_Loop();
+
 TAG_EXIT:
 	//終了処理
 	PCA9685_pwmWrite(0, 0);
@@ -195,8 +179,7 @@ TAG_EXIT:
 	PCA9685_pwmWrite(2, 0);
 	PCA9685_pwmWrite(3, 0);
 	PCA9685_pwmWrite(4, 0);
-	PCA9685_pwmWrite(5, 0);
-	PCA9685_pwmWrite(6, 0);
+	PCA9685_pwmWrite(NAZE32_BARO, 0);
 	
 
 	VL53L0X_close();
@@ -206,145 +189,6 @@ TAG_EXIT:
 	fclose(m_fpVL53L0X);
 
     return 0;
-}
-
-/********************************************************************************
-*	BETAFPV F4 2S AIO Brushless No Rx用　メインループ
-********************************************************************************/
-static void BETAFPV_F4_2S_AIO_Main_Loop(void)
-{
-		uint16_t VL53L0X_Measurement;		//測定値(mm)
-	char tmp[256];
-//	double dfPower[4];		//pwm1..4の個別用出力調整値
-	int nHeadPower[4];		//指定方向へ移動するための出力値
-	int nDirection;
-	int nOffsetPower = OFFSET_POWER;
-	int nMode= 0;		//最大地上高検知:1
-	int nSaveHeight = 0;
-
-	struct timeval tv_start;
-	struct timeval tv_now;
-	double dfFlightTimeStart;
-	double dfFlightTime;
-	double dfFlightTimeSave=0.;
-
-
-	//BETAFPV_F4_2S_AIO init
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL		, BETAFPV_F4_2S_AIO_NEUTRAL);
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH	, BETAFPV_F4_2S_AIO_NEUTRAL);
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_YAW		, BETAFPV_F4_2S_AIO_NEUTRAL);
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE	, BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE);
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM		, BETAFPV_F4_2S_AIO_ARM_OFF);
-	sleep(1);
-
-	printf("--- arming start\n");
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM, BETAFPV_F4_2S_AIO_ARM_ON);
-
-	memset(&m_AttitudeData, 0, sizeof(m_AttitudeData));//初期化
-
-
-	gettimeofday(&tv_start, NULL);		//start time
-	dfFlightTimeStart = ((double)(tv_start.tv_usec) / 1000000) + tv_start.tv_sec;
-	//	printf("%ld %06lu\n", tv_start.tv_sec, tv_start.tv_usec);
-
-//	start_time = time(NULL);
-	printf("--- started main loop.\n");
-	for(;;){
-		gettimeofday(&tv_now, NULL);		//now time
-		dfFlightTime = ((double)(tv_now.tv_usec) / 1000000) + tv_now.tv_sec - dfFlightTimeStart;
-//		printf("Flight time %0.6lf\n", dfFlightTime);
-		if (dfFlightTime > DEBUG_MAINLOOP_TO) {						//debug 指定秒で終了する
-			printf("--- stop. Debug Time out. [%0.0lfs]\n", DEBUG_MAINLOOP_TO);
-			break;
-		}
-
-
-
-		if (dfFlightTime > FLIGHT_TIME) {
-			nOffsetPower = LANDING_POWER;	//landing power
-		}
-
-
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
-
-
-
-
-		//最大地上高で静止させる
-		if (dfFlightTime <= FLIGHT_TIME) {
-			if (VL53L0X_Measurement > MAXIMUM_GROUND_CLEARANCE) {
-				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement){//降下を検知したら再上昇させる
-					nOffsetPower = OFFSET_POWER+20;
-					nMode= 0;	
-				}
-				else{
-					nMode= 1;	//最大地上高検知
-					nOffsetPower = LANDING_POWER;//降下開始
-					nSaveHeight = VL53L0X_Measurement;
-				}
-			}
-			else {
-				nOffsetPower = OFFSET_POWER;
-			}
-		}
-
-
-//	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement);								//degbug地上高(mm)
-//		DebugPrint(tmp,m_fpVL53L0X);													//debug用
-
-		if (dfFlightTime >= 2.0) {
-			if(VL53L0X_Measurement < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
-				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement,MINIMUM_GROUND_CLEARANCE);
-				break;
-			}
-		}
-
-
-		//ジャイロ/加速度
-		MPU6050_GetMeasurements(&m_AttitudeData.yaw,
-								&m_AttitudeData.pitch,
-								&m_AttitudeData.roll,
-								&m_AttitudeData.aax,
-								&m_AttitudeData.aay,
-								&m_AttitudeData.aaz,
-								m_fp);//MPU6050測定値獲得
-
-																				
-
-//		GetAttitudeControl(dfPower);//姿勢制御値獲得
-
-
-		//モータ出力
-		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement,m_AttitudeData.aay);
-
-	}	//for()
-
-
-	gettimeofday(&tv_now, NULL);		//now time
-	dfFlightTime = ((double)(tv_now.tv_usec) / 1000000) + tv_now.tv_sec - dfFlightTimeStart;
-	printf("Flight time %0.6lf\n", dfFlightTime);
-
-
-
-	printf("--- throttle neutral\n");
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE);
-
-	printf("--- arming stop!\n");
-	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM, BETAFPV_F4_2S_AIO_ARM_OFF);
-	sleep(1);	
-
-
-//test
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE	, 1000);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL		, 1100);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH	, 1200);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_YAW		, 1300);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_AUX2		, 1400);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_AUX3		, 1500);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_AUX4		, 1600);
-//	sleep(5);
-
 }
 
 /********************************************************************************
@@ -526,6 +370,8 @@ static void Naze32_Main_Loop(void)
 //	sleep(1);
 //	printf("--- baro test stop\n");
 //	PCA9685_pwmWrite(NAZE32_BARO, NAZE32_BARO_OFF);
+
+
 
 
 	printf("--- arming stop!\n");
@@ -1162,4 +1008,3 @@ static void DebugPrint(char *buf,FILE *fp)
 	fputs(buf,fp);
 	fseek(fp,  0L, SEEK_SET);
 }
-
