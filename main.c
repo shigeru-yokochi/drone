@@ -3,11 +3,11 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <wiringPi.h>
 
 //VL53L0X
 #include "vl53l0x_api.h"
 #include "vl53l0x_platform.h"
-
 
 //BLE
 extern int Ble_init(int nBeaconMax, char *cpAdr1, char *cpAdr2, char *cpAdr3, char *cpAdr4);
@@ -15,12 +15,20 @@ extern int BleRSSI();
 extern int Ble_close();
 
 //VL53L0X
-extern VL53L0X_Error VL53L0X_init(void);
-extern void VL53L0X_close(void);
-extern VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement);
+#define VL53L0X_MAX 1
+#define VL53L0X_XSHUT_1_GPIO 26
+#define VL53L0X_XSHUT_2_GPIO 19
+#define VL53L0X_XSHUT_3_GPIO 20
+#define VL53L0X_XSHUT_4_GPIO 16
+#define VL53L0X_XSHUT_5_GPIO 21	//Altitude
+extern VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t device_id);
+extern void VL53L0X_close(uint16_t device_id);
+extern VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint16_t device_id);
+
 //MPU6050
 extern uint8_t MPU6050_init();
 extern void MPU6050_GetMeasurements(float *yaw,float *pitch,float *roll, int *aax, int *aay, int *aaz, FILE *fplog);
+
 //PCA9685
 extern int PCA9685_init(void);
 extern void PCA9685_pwmWrite(uint8_t ch, double pulseWidth_usec);
@@ -30,15 +38,12 @@ extern void PCA9685_pwmWrite(uint8_t ch, double pulseWidth_usec);
 extern int HMC5883L_init(void);
 extern int HMC5883L_GetDirection(void);
 
-
 //main.c
 static int I2c_device_init(void);
 static int Debug_Print_init(void);
-static void Loop(void);
 static void DebugPrint(char *buf,FILE *fp);
 static void BLHeli_init(void);
 static int SetPwmBalance(int nPwm1,int nPwm2);
-static int PwmBarance(void);
 static void HeadNorth(int nDirection, int *npPower1, int *npPower2, int *npPower3, int *npPower4);
 void GetAttitudeControl(double *dfpPower);
 void Landing(void);
@@ -153,7 +158,6 @@ int main(int argc, char **argv)
 	if(I2c_device_init() == -1)return -1;	//i2cデバイス初期化
 	if(Debug_Print_init() == -1)return -1;	//デバッグ出力用ファイル初期化
 //	BLHeli_init();							//BLHeli(ESC)初期化
-//	if(PwmBarance() == -1)goto TAG_EXIT;	//各pwmの出力調整
 
 
 //goto TAG_EXIT;
@@ -169,7 +173,6 @@ int main(int argc, char **argv)
 
 	printf("DELTA_T=%0.4lf\nPKp=%0.4lf\nPKi=%0.4lf\nPKd=%0.4lf\n\PWM_BASE_POWER=%d\n",DELTA_T,P_KP,P_KI,P_KD, PWM_BASE_POWER);
 
-//	Loop();								//メインループ
 	Naze32_Main_Loop();
 
 TAG_EXIT:
@@ -182,7 +185,7 @@ TAG_EXIT:
 	PCA9685_pwmWrite(NAZE32_BARO, 0);
 	
 
-	VL53L0X_close();
+	VL53L0X_close(0);
 	Ble_close();
 
 	fclose(m_fp);
@@ -196,7 +199,7 @@ TAG_EXIT:
 ********************************************************************************/
 static void Naze32_Main_Loop(void)
 {
-	uint16_t VL53L0X_Measurement;		//測定値(mm)
+	uint16_t VL53L0X_Measurement[VL53L0X_MAX];		//VL53L0X_MAX台分の測定値(mm)	
 	char tmp[256];
 //	double dfPower[4];		//pwm1..4の個別用出力調整値
 	int nHeadPower[4];		//指定方向へ移動するための出力値
@@ -298,15 +301,15 @@ static void Naze32_Main_Loop(void)
 //			printf("--- stop. Debug Time out. [%0.0lfs]\n",DEBUG_MAINLOOP_TO);
 //			break;
 //		}
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
 
 
 
 
 		//最大地上高で静止させる
 		if (dfFlightTime <= FLIGHT_TIME) {
-			if (VL53L0X_Measurement > MAXIMUM_GROUND_CLEARANCE) {
-				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement){//降下を検知したら再上昇させる
+			if (VL53L0X_Measurement[0] > MAXIMUM_GROUND_CLEARANCE) {
+				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement[0]){//降下を検知したら再上昇させる
 					nOffsetPower = OFFSET_POWER+20;
 					nMode= 0;	
 				}
@@ -314,7 +317,7 @@ static void Naze32_Main_Loop(void)
 					nMode= 1;	//最大地上高検知
 					PCA9685_pwmWrite(NAZE32_BARO	, NAZE32_BARO_ON);
 					nOffsetPower = LANDING_POWER;//降下開始
-					nSaveHeight = VL53L0X_Measurement;
+					nSaveHeight = VL53L0X_Measurement[0];
 				}
 			}
 			else {
@@ -327,12 +330,12 @@ static void Naze32_Main_Loop(void)
 
 
 
-//	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement);								//degbug地上高(mm)
+//	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement[0]);								//degbug地上高(mm)
 //		DebugPrint(tmp,m_fpVL53L0X);													//debug用
 
 		if (dfFlightTime >= 2.0) {
-			if(VL53L0X_Measurement < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
-				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement,MINIMUM_GROUND_CLEARANCE);
+			if(VL53L0X_Measurement[0] < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
+				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement[0],MINIMUM_GROUND_CLEARANCE);
 				break;
 			}
 		}
@@ -354,7 +357,7 @@ static void Naze32_Main_Loop(void)
 
 		//モータ出力
 		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement,m_AttitudeData.aay);
+		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement[0],m_AttitudeData.aay);
 
 	}	//for()
 
@@ -377,235 +380,6 @@ static void Naze32_Main_Loop(void)
 	printf("--- arming stop!\n");
 	PCA9685_pwmWrite(NAZE32_ARM, NAZE32_ARM_OFF);
 	sleep(1);	
-
-}
-/********************************************************************************
-*	ループ
-********************************************************************************/
-static void Loop(void)
-{
-	uint16_t VL53L0X_Measurement;		//測定値(mm)
-//	int nPitchPwmP,nPitchPwmN,nRollPwmP,nRollPwmN,nPwm[4],nPwmBasePower;
-//	float yaw=0.,pitch=0.,roll=0.,pre_pitch =-9999.,pre_roll = -9999.;
-	char tmp[256];
-	double dfPower[4];		//pwm1..4の個別用出力調整値
-//	time_t	start_time;
-	int nHeadPower[4];		//指定方向へ移動するための出力値
-	int nDirection;
-//	int nOffsetPower=550;
-	int nOffsetPower = OFFSET_POWER;
-	//	int flight_time;
-//	int nAAx, nAAy, nAAz;
-	int nMode= 0;		//最大地上高検知:1
-	int nSaveHeight = 0;
-
-
-
-	struct timeval tv_start;
-	struct timeval tv_now;
-	double dfFlightTimeStart;
-	double dfFlightTime;
-	double dfFlightTimeSave=0.;
-
-
-	memset(&m_AttitudeData, 0, sizeof(m_AttitudeData));//初期化
-
-	dfPower[0]=0.;
-	dfPower[1]=0.;
-	dfPower[2]=0.;
-	dfPower[3]=0.;
-
-
-
-
-	gettimeofday(&tv_start, NULL);		//start time
-	dfFlightTimeStart = ((double)(tv_start.tv_usec) / 1000000) + tv_start.tv_sec;
-	//	printf("%ld %06lu\n", tv_start.tv_sec, tv_start.tv_usec);
-
-//	start_time = time(NULL);
-	printf("--- started main loop.\n");
-	for(;;){
-		gettimeofday(&tv_now, NULL);		//now time
-		dfFlightTime = ((double)(tv_now.tv_usec) / 1000000) + tv_now.tv_sec - dfFlightTimeStart;
-//		printf("Flight time %0.6lf\n", dfFlightTime);
-		if (dfFlightTime > DEBUG_MAINLOOP_TO) {						//debug 指定秒で終了する
-			printf("--- stop. Debug Time out. [%0.0lfs]\n", DEBUG_MAINLOOP_TO);
-			break;
-		}
-
-
-
-		if (dfFlightTime > FLIGHT_TIME) {
-			nOffsetPower = LANDING_POWER;	//landing power
-		}
-
-/*
-		if ((dfFlightTime - dfFlightTimeSave) >= 0.1) {	//0.1秒単位で処理を実行する
-			dfFlightTimeSave = dfFlightTime;
-
-			if (dfFlightTime < 3) {		//3秒までの処理はここに書く
-//			if ((((int)dfFlightTime) %10) < 5) {		//5秒ごとにUP-DOWNする
-					if (nOffsetPower < 500) {
-					nOffsetPower += 10;
-				}
-			}
-			else  {
-				if (nOffsetPower > 0) {
-					nOffsetPower -= 10;
-				}
-			}
-
-
-
-			printf("--- Flight time:%0.6lf nOffsetPower:%d\n", dfFlightTime, nOffsetPower);
-		}
-
-*/
-
-
-//		if(difftime(time(NULL), start_time) > DEBUG_MAINLOOP_TO){						//debug 指定秒で終了する
-//			printf("--- stop. Debug Time out. [%0.0lfs]\n",DEBUG_MAINLOOP_TO);
-//			break;
-//		}
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
-
-
-/*
-		//最大地上高で静止させる
-		if (dfFlightTime <= FLIGHT_TIME) {
-			if (VL53L0X_Measurement > MAXIMUM_GROUND_CLEARANCE) {
-				if(nMode == 1 && nSaveHeight > VL53L0X_Measurement){//降下を検知したら再上昇させる
-					nOffsetPower = OFFSET_POWER+20;
-					nMode= 0;	
-				}
-				else{
-					nMode= 1;	//最大地上高検知
-					nOffsetPower = LANDING_POWER;//降下開始
-					nSaveHeight = VL53L0X_Measurement;
-				}
-			}
-			else {
-				nOffsetPower = OFFSET_POWER;
-			}
-		}
-*/
-
-//	    sprintf(tmp,"VL53L0X:%dmm\n", VL53L0X_Measurement);								//degbug地上高(mm)
-//		DebugPrint(tmp,m_fpVL53L0X);													//debug用
-
-		if (dfFlightTime >= 2.0) {
-			if(VL53L0X_Measurement < MINIMUM_GROUND_CLEARANCE){								//最小地上高未満だったら終了する
-				printf("--- stop. Minimum ground clearance. [%dmm][%dmm]\n",VL53L0X_Measurement,MINIMUM_GROUND_CLEARANCE);
-				break;
-			}
-		}
-
-//		BleRSSI();	//BLE RSSI獲得
-
-//↓一旦中止　加速度を使ってみる
-//dfPower[1] = GetPIDPitch(pitch,0.);	//PID制御	pich
-//dfPower[0] = GetPIDPitch(roll,0.);	//PID制御	roll
-//printf("pich:pid\t%02.2lf\t%02.2lf\troll:pid\t%02.2lf\t%02.2lf\n",  pitch, dfPower[0],roll,dfPower[0]);
-
-
-
-
-		if(m_AttitudeData.pitch > 60 || m_AttitudeData.pitch < -60){
-			printf("*** over pitch stop!!!\n");
-			break;
-		}
-		if(m_AttitudeData.roll > 60 || m_AttitudeData.roll < -60){
-			printf("*** over rool stop!!!\n");
-			break;
-		}
-
-		//ジャイロ/加速度
-		MPU6050_GetMeasurements(&m_AttitudeData.yaw,
-								&m_AttitudeData.pitch,
-								&m_AttitudeData.roll,
-								&m_AttitudeData.aax,
-								&m_AttitudeData.aay,
-								&m_AttitudeData.aaz,
-								m_fp);//MPU6050測定値獲得
-
-																				
-
-		GetAttitudeControl(dfPower);//姿勢制御値獲得
-
-	
-
-//		DebugPrint(tmp,m_fp);												//debug
-
-
-
-
-//コンパス検証ここから
-//		nDirection = HMC5883L_GetDirection();		//コンパス(北:0)
-////		nDirection += 90;							//西:0にする
-////		nDirection -= 90;							//東:0にする
-//		if (nDirection < 0)nDirection += 360;
-//		if (nDirection >= 360)nDirection -= 360;
-//		memset(nHeadPower, 0, sizeof(nHeadPower));
-//		HeadNorth(nDirection, &nHeadPower[0], &nHeadPower[1], &nHeadPower[2], &nHeadPower[3]);//北に向かう
-//		printf("(%d)%d %d %d %d\n", nDirection,nHeadPower[0], nHeadPower[1], nHeadPower[2], nHeadPower[3]);
-//コンパス検証ここまで
-
-
-//dfPower[1] pitch 制御　-----> ここから
-//		if(pre_pitch == -9999)pre_pitch = pitch;	//初回
-//
-//		if(pitch > 1){	
-//			if(pitch-pre_pitch > 10){//前回とのpitchの差が大きい場合はpwmを下げる　初回は無効にする！！
-//				printf("--- down!!\n");
-//				dfPower[1]-=10;   //減速
-//			}
-//			else   if(pre_pitch-pitch <= 0 ){
-//				if(pitch > 20){
-//					dfPower[1]+=1;   //プラスしたのに上昇していないのでさらにプラスする
-//				}
-//				else{
-//	    	        dfPower[1]+=0.1;   //水平付近は慎重にやる
-//				}
-//			}
-//
-//		}
-//
-//		if(pitch < -1){	
-//			if(pitch - pre_pitch < -10){//前回とのpitchの差が大きい場合はpwmを上げる　　初回は無効にする！！
-//				dfPower[1]+=10;   //加速
-//				printf("--- up!!\n");
-//			}
-//			else  if(pre_pitch-pitch >= 0 ){
-//				if(pitch < -20 ){
-//					dfPower[1]-=1;   //マイナスしたのに下降していないのでさらにマイナスする
-//				}
-//				else{
-//		          dfPower[1]-=0.1;   //水平付近は慎重にやる
-//				}
-//			}
-//		}
-//
-//		pre_pitch=pitch;
-//<----ここまで
-
-
-
-
-		//モータ出力
-		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement,m_AttitudeData.aay);
-//		PCA9685_pwmWrite(0, (double)(PWM_MIN + PWM_BASE_POWER + dfPower[0] + nOffsetPower));
-//		PCA9685_pwmWrite(1, (double)(PWM_MIN + PWM_BASE_POWER + dfPower[1] + nOffsetPower));
-//		PCA9685_pwmWrite(2, (double)(PWM_MIN + PWM_BASE_POWER + dfPower[2] + nOffsetPower));
-//		PCA9685_pwmWrite(3, (double)(PWM_MIN + PWM_BASE_POWER + dfPower[3] + nOffsetPower));
-
-	}	//for()
-
-
-	gettimeofday(&tv_now, NULL);		//now time
-	dfFlightTime = ((double)(tv_now.tv_usec) / 1000000) + tv_now.tv_sec - dfFlightTimeStart;
-	printf("Flight time %0.6lf\n", dfFlightTime);
-
 
 }
 /*****************************************************************
@@ -640,7 +414,6 @@ void Landing(void)
 
 
 }
-
 /*****************************************************************
 *	姿勢制御値獲得
 ******************************************************************/
@@ -770,63 +543,6 @@ float GetPIDRoll(float fSensorVal,float fTragetVal)
 
 
 /********************************************************************************
-*	各pwmの出力調整
-********************************************************************************/
-static int PwmBarance(void)
-{
-	int n13,n24,n14,n23;
-
-	n13 = SetPwmBalance(1,3);
-	if(n13 == -1)return -1;
-	n24 = SetPwmBalance(2,4);
-	if(n24 == -1)return -1;
-	n14 = SetPwmBalance(1,4);
-	if(n14 == -1)return -1;
-	n23 = SetPwmBalance(2,3);
-	if(n23 == -1)return -1;
-
-
-printf("+++ n02=%d n13=%d n03=%d n12=%d\n",n13,n24,n14,n23);
-	return 0;
-}
-/********************************************************************************
-*	pwmバランス調整
-********************************************************************************/
-static int SetPwmBalance(int nPwm1,int nPwm2)
-{
-	uint16_t VL53L0X_Measurement;		//測定値(mm)
-	time_t	start_time;
-	int i,save,ret=-1;
-
-	start_time = time(NULL);
-	printf("--- SetPwmBalance\n");
-	for(i=0;i<200;i++){
-		if(difftime(time(NULL), start_time) > DEBUG_MAINLOOP_TO){						//debug 指定秒で終了する
-			printf("--- stop. Debug Time out. [%0.0lfs]\n",DEBUG_MAINLOOP_TO);
-			ret=-1;
-			break;
-		}
-
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得
-//	    printf("VL53L0X:%dmm  pwm=%d\n", VL53L0X_Measurement,i);								//degbug地上高(mm)
-		if(i == 0)save=VL53L0X_Measurement;
-		if(save+7 < VL53L0X_Measurement){//7mm上昇したら
-			ret = i;
-			break;
-		}
-
-		PCA9685_pwmWrite(nPwm1, (double)(PWM_MIN + PWM_BASE_POWER + i)); 
-		PCA9685_pwmWrite(nPwm2, (double)(PWM_MIN + PWM_BASE_POWER + i)); 
-
-	}
-	PCA9685_pwmWrite(nPwm1, PWM_MIN);
-	PCA9685_pwmWrite(nPwm2, PWM_MIN);
-
-	usleep(2000000);
-	return ret;
-}
-
-/********************************************************************************
 *	北(2-4側)に向かうための追加するモータ出力値を求める
 *	nDirection : 0..359
 *	機体は、2-4側:0(北) 4-1側:90(東) 1-3側:180(南) 3-2側:270(西)
@@ -945,8 +661,12 @@ static void BLHeli_init(void)
 ********************************************************************************/
 static int I2c_device_init(void)
 {
+	//L53L0Xを複数使用するためxshutをlowにする
+   	pinMode(VL53L0X_XSHUT_5_GPIO,OUTPUT);
+    digitalWrite(VL53L0X_XSHUT_5_GPIO,LOW);
+
 	//初期化
-	if(VL53L0X_init() != VL53L0X_ERROR_NONE){	//距離センサ
+	if(VL53L0X_init(VL53L0X_XSHUT_5_GPIO,0x2e,0) != VL53L0X_ERROR_NONE){	//距離センサ 5 Altitude
 		printf("*** VL53L0X_init()err\n");
 		return -1;
 	}
@@ -954,21 +674,21 @@ static int I2c_device_init(void)
 
 	if(MPU6050_init() != 0){						//ジャイロ加速度センサ
 		printf("*** MPU6050_init()err\n");
-		VL53L0X_close();
+		VL53L0X_close(0);
 		return -1;
 	}
 	printf("--- MPU6050_init() OK\n");
 
 	if(PCA9685_init() != 0){					//PWMドライバ
 		printf("*** PCA9685_init()err\n");
-		VL53L0X_close();
+		VL53L0X_close(0);
 		return -1;
 	}
 	printf("--- PCA9685_init() OK\n");
 
 	if (HMC5883L_init() == 1) {					//コンパス
 		printf("*** HMC5883L_init() error.\n");
-		VL53L0X_close();
+		VL53L0X_close(0);
 		return -1;
 	}
 	printf("--- HMC5883L_init() OK\n");
@@ -984,14 +704,14 @@ static int Debug_Print_init(void)
 {
 	if((m_fp = fopen("/tmp/test.log", "w")) == NULL) {	//debug用 ジャイロ加速度センサ値表示
 		printf("fopen err\n");
-		VL53L0X_close();
+		VL53L0X_close(0);
 		return -1;
 	}
 
 	if((m_fpVL53L0X = fopen("/tmp/VL53L0X.log", "w")) == NULL) {//debug用 距離センサ値表示
 		printf("fopen err\n");
 		fclose(m_fp);
-		VL53L0X_close();
+		VL53L0X_close(0);
 		return -1;
 	}
 
