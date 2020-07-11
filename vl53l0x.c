@@ -32,7 +32,7 @@ static VL53L0X_Error VL53L0X_WaitStopCompleted(VL53L0X_DEV Dev);
 ************************************************************************/
 VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t device_id)
 {
-    VL53L0X_Error 			Status = L53L0X_ERROR_NONE;
+    VL53L0X_Error           Status = L53L0X_ERROR_NONE;
     VL53L0X_Version_t		Version;
     VL53L0X_Version_t		*pVersion   = &Version;
     VL53L0X_DeviceInfo_t	DeviceInfo;
