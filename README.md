@@ -1,5 +1,4 @@
-# drone
-Raspberry Pi Zero で自律飛行ドローン作成
+# 構成
 
 
 ![image](https://user-images.githubusercontent.com/12773136/87627932-d0b1de80-c76a-11ea-9244-5b19050b3075.jpg)
