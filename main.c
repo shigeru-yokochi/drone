@@ -678,22 +678,22 @@ static int I2c_device_init(void)
     digitalWrite(VL53L0X_XSHUT_5_GPIO,LOW);
 
 	//初期化
-	if(VL53L0X_init(VL53L0X_XSHUT_1_GPIO,0x2a,0) != VL53L0X_ERROR_NONE){	//距離センサ 1 rigth
-		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
-	if(VL53L0X_init(VL53L0X_XSHUT_2_GPIO,0x2b,1) != VL53L0X_ERROR_NONE){	//距離センサ 2 rear
-		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
-	if(VL53L0X_init(VL53L0X_XSHUT_3_GPIO,0x2c,2) != VL53L0X_ERROR_NONE){	//距離センサ 3 left
-		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
-	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x2d,3) != VL53L0X_ERROR_NONE){	//距離センサ 4 front
-		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
+//	if(VL53L0X_init(VL53L0X_XSHUT_1_GPIO,0x2a,0) != VL53L0X_ERROR_NONE){	//距離センサ 1 rigth
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
+//	if(VL53L0X_init(VL53L0X_XSHUT_2_GPIO,0x2b,1) != VL53L0X_ERROR_NONE){	//距離センサ 2 rear
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
+//	if(VL53L0X_init(VL53L0X_XSHUT_3_GPIO,0x2c,2) != VL53L0X_ERROR_NONE){	//距離センサ 3 left
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
+//	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x2d,3) != VL53L0X_ERROR_NONE){	//距離センサ 4 front
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
 	if(VL53L0X_init(VL53L0X_XSHUT_5_GPIO,0x2e,4) != VL53L0X_ERROR_NONE){	//距離センサ 5 Altitude
 		printf("*** VL53L0X_init()err\n");
 		return -1;
