@@ -371,18 +371,18 @@ static void Naze32_Main_Loop(void)
 		//障害物回避用の出力補正値獲得(ROLL)
 		Get_Correction_Power(VL53L0X_Measurement[0],VL53L0X_Measurement[2],&roll_power);
 		//姿勢を水平に近づける出力補正値獲得（ROLL）
-		if(roll_power == 0){
-			Get_Horizontal_Level_Power(m_AttitudeData.roll-3,&roll_power);
-		}
+	//	if(roll_power == 0){
+	//		Get_Horizontal_Level_Power(m_AttitudeData.roll-3,&roll_power);
+	//	}
 		//モータ出力(ROLL)
 		PCA9685_pwmWrite(NAZE32_ROLL, (double)(NAZE32_NEUTRAL + roll_power));
 
 		//障害物回避用の出力補正値獲得(PITCH)
 		Get_Correction_Power(VL53L0X_Measurement[3],VL53L0X_Measurement[1],&pitch_power);
 		//姿勢を水平に近づける出力補正値獲得（PITCH）
-		if(pitch_power == 0){
-			Get_Horizontal_Level_Power(m_AttitudeData.pitch+4,&pitch_power);
-		}
+	//	if(pitch_power == 0){
+	//		Get_Horizontal_Level_Power(m_AttitudeData.pitch+4,&pitch_power);
+	//	}
 		//モータ出力(PITCH)
 		PCA9685_pwmWrite(NAZE32_PITCH, (double)(NAZE32_NEUTRAL + pitch_power));
 
@@ -433,7 +433,7 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 {
 	if(d1 < THRESHOLD_DISTANCE){
 		if(d2 < THRESHOLD_DISTANCE){
-			//補正不能
+			//補正不能(両側に空間がない状態)
 			*correction_power = 0;
 			//printf("+++ THRESHOLD_DISTANCE MINIMUM\n");
 			return false;
