@@ -674,36 +674,58 @@ static int I2c_device_init(void)
    	pinMode(VL53L0X_XSHUT_3_GPIO,OUTPUT);
    	pinMode(VL53L0X_XSHUT_4_GPIO,OUTPUT);
    	pinMode(VL53L0X_XSHUT_5_GPIO,OUTPUT);
+
     digitalWrite(VL53L0X_XSHUT_1_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_2_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_3_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_4_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_5_GPIO,LOW);
 
+    if(digitalRead(VL53L0X_XSHUT_1_GPIO) != LOW){
+		printf("*** VL53L0X_XSHUT_1_GPIO error\n"); //wiringPiSetupGpio()を忘れるとエラーになる
+		return -1;
+	}
+    if(digitalRead(VL53L0X_XSHUT_2_GPIO) != LOW){
+		printf("*** VL53L0X_XSHUT_2_GPIO error\n");
+		return -1;
+	}
+    if(digitalRead(VL53L0X_XSHUT_3_GPIO) != LOW){
+		printf("*** VL53L0X_XSHUT_3_GPIO error\n");
+		return -1;
+	}
+    if(digitalRead(VL53L0X_XSHUT_4_GPIO) != LOW){
+		printf("*** VL53L0X_XSHUT_4_GPIO error\n");
+		return -1;
+	}
+    if(digitalRead(VL53L0X_XSHUT_5_GPIO) != LOW){
+		printf("*** VL53L0X_XSHUT_5_GPIO error\n");
+		return -1;
+	}
+
+
 	//初期化
-	if(VL53L0X_init(VL53L0X_XSHUT_1_GPIO,0x3a,0) != VL53L0X_ERROR_NONE){	//距離センサ 1 rigth
+	if(VL53L0X_init(VL53L0X_XSHUT_1_GPIO,0x2a,0) != VL53L0X_ERROR_NONE){	//距離センサ 1 rigth
 		printf("*** VL53L0X_init(0)err\n");
 		return -1;
 	}
-	if(VL53L0X_init(VL53L0X_XSHUT_2_GPIO,0x3b,1) != VL53L0X_ERROR_NONE){	//距離センサ 2 rear
+	if(VL53L0X_init(VL53L0X_XSHUT_2_GPIO,0x2b,1) != VL53L0X_ERROR_NONE){	//距離センサ 2 rear
 		printf("*** VL53L0X_init(1)err\n");
 		return -1;
 	}
-	if(VL53L0X_init(VL53L0X_XSHUT_3_GPIO,0x3c,2) != VL53L0X_ERROR_NONE){	//距離センサ 3 left
+	if(VL53L0X_init(VL53L0X_XSHUT_3_GPIO,0x2c,2) != VL53L0X_ERROR_NONE){	//距離センサ 3 left
 		printf("*** VL53L0X_init(2)err\n");
 		return -1;
 	}
-	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x3d,3) != VL53L0X_ERROR_NONE){	//距離センサ 4 front
+	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x2d,3) != VL53L0X_ERROR_NONE){	//距離センサ 4 front
 		printf("*** VL53L0X_init(3)err\n");
 		return -1;
 	}
-	if(VL53L0X_init(VL53L0X_XSHUT_5_GPIO,0x3e,4) != VL53L0X_ERROR_NONE){	//距離センサ 5 Altitude
+	if(VL53L0X_init(VL53L0X_XSHUT_5_GPIO,0x2e,4) != VL53L0X_ERROR_NONE){	//距離センサ 5 Altitude
 		printf("*** VL53L0X_init(4)err\n");
 		return -1;
 	}
 	printf("--- VL53L0X_init() OK\n");
 
-return -1;
 
 	if(MPU6050_init() != 0){						//ジャイロ加速度センサ
 		printf("*** MPU6050_init()err\n");
