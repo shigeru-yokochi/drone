@@ -671,11 +671,11 @@ static int I2c_device_init(void)
    	pinMode(VL53L0X_XSHUT_3_GPIO,OUTPUT);
    	pinMode(VL53L0X_XSHUT_4_GPIO,OUTPUT);
    	pinMode(VL53L0X_XSHUT_5_GPIO,OUTPUT);
-    digitalWrite(VL53L0X_XSHUT_1_GPIO,LOW);
-    digitalWrite(VL53L0X_XSHUT_2_GPIO,LOW);
-    digitalWrite(VL53L0X_XSHUT_3_GPIO,LOW);
-    digitalWrite(VL53L0X_XSHUT_4_GPIO,LOW);
-    digitalWrite(VL53L0X_XSHUT_5_GPIO,LOW);
+    digitalWrite(VL53L0X_XSHUT_1_GPIO,0);
+    digitalWrite(VL53L0X_XSHUT_2_GPIO,0);
+    digitalWrite(VL53L0X_XSHUT_3_GPIO,0);
+    digitalWrite(VL53L0X_XSHUT_4_GPIO,0);
+    digitalWrite(VL53L0X_XSHUT_5_GPIO,0);
 
 return -1;
 	//初期化
