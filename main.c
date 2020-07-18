@@ -671,11 +671,14 @@ static int I2c_device_init(void)
    	pinMode(VL53L0X_XSHUT_3_GPIO,OUTPUT);
    	pinMode(VL53L0X_XSHUT_4_GPIO,OUTPUT);
    	pinMode(VL53L0X_XSHUT_5_GPIO,OUTPUT);
+   usleep(1000000); //1000ms	   
     digitalWrite(VL53L0X_XSHUT_1_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_2_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_3_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_4_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_5_GPIO,LOW);
+return -1;
+
 
 	//初期化
 	if(VL53L0X_init(VL53L0X_XSHUT_1_GPIO,0x3a,0) != VL53L0X_ERROR_NONE){	//距離センサ 1 rigth
