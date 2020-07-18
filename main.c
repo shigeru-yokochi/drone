@@ -696,8 +696,8 @@ static int I2c_device_init(void)
 //	}
 //	if(VL53L0X_init(VL53L0X_XSHUT_5_GPIO,0x2e,5) != VL53L0X_ERROR_NONE){	//距離センサ 5 Altitude
 //		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
+//		return -1;
+//	}
 	printf("--- VL53L0X_init() OK\n");
 return -1;
 
