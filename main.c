@@ -48,7 +48,8 @@ static void HeadNorth(int nDirection, int *npPower1, int *npPower2, int *npPower
 void GetAttitudeControl(double *dfpPower);
 void Landing(void);
 static void Naze32_Main_Loop(void);
-
+static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power);
+static void Get_Horizontal_Level_Power(float val,int *correction_power);
 
 //BLE BEACON
 #define BLE_BEACON_MAX	2	//1個使用 最大4個
@@ -102,7 +103,9 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define NAZE32_THROTTLE			3
 #define NAZE32_ARM				4
 #define NAZE32_BARO				15
-
+#define THRESHOLD_DISTANCE 250	//障害物回避距離(mm)
+#define CORRECTION_POWER_P 50	//障害物回避用の出力補正値
+#define CORRECTION_POWER_N -50	//障害物回避用の出力補正値
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高
 #define MAXIMUM_GROUND_CLEARANCE	500	//最大地上高(できるだけ高くするmax500目標)
@@ -362,10 +365,30 @@ static void Naze32_Main_Loop(void)
 //		GetAttitudeControl(dfPower);//姿勢制御値獲得
 
 
+
+		//障害物回避用の出力補正値獲得(ROLL)
+		Get_Correction_Power(VL53L0X_Measurement[0],VL53L0X_Measurement[2],&roll_power);
+		//姿勢を水平に近づける出力補正値獲得（ROLL）
+		if(roll_power == 0){
+			Get_Horizontal_Level_Power(m_AttitudeData.roll-3,&roll_power);
+		}
+		//モータ出力(ROLL)
+		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + roll_power));
+
+		//障害物回避用の出力補正値獲得(PITCH)
+		Get_Correction_Power(VL53L0X_Measurement[3],VL53L0X_Measurement[1],&pitch_power);
+		//姿勢を水平に近づける出力補正値獲得（PITCH）
+		if(pitch_power == 0){
+			Get_Horizontal_Level_Power(m_AttitudeData.pitch+4,&pitch_power);
+		}
+		//モータ出力(PITCH)
+		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + pitch_power));
+
+
 		//モータ出力(throttle)
 		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + nOffsetPower));
 
-		printf("power:%d time:%0.2lf VL53L0X(1..5): %4d %4d %4d %4d %4d aay:%d\n", 
+		printf("power:%d time:%0.2lf VL53L0X(→.↓.←.↑.alt): %4d %4d %4d %4d %4d aay:%d\n", 
 			nOffsetPower, 
 			dfFlightTime, 
 			VL53L0X_Measurement[0],
@@ -397,6 +420,48 @@ static void Naze32_Main_Loop(void)
 	PCA9685_pwmWrite(NAZE32_ARM, NAZE32_ARM_OFF);
 	sleep(1);	
 
+}
+/********************************************************************************
+*	障害物回避用の出力補正値獲得（ROLL補正とPITCH補正に使用する）
+* 進行方向の障害物との距離がTHRESHOLD_DISTANCE未満になった場合、進行方向を逆にする
+* 進行方向と進行逆方向とも障害物との距離がTHRESHOLD_DISTANCE未満になった場合、failになる
+********************************************************************************/
+static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
+{
+	if(d1 < THRESHOLD_DISTANCE){
+		if(d2 < THRESHOLD_DISTANCE){
+			//補正不能
+			*correction_power = 0;
+			//printf("+++ THRESHOLD_DISTANCE MINIMUM\n");
+			return false;
+		}
+		//マイナス補正
+		*correction_power = CORRECTION_POWER_N;
+		return true;
+	}
+	//プラス補正
+	if(d2 < THRESHOLD_DISTANCE){
+		*correction_power = CORRECTION_POWER_P;
+		return true;
+	}
+	//補正なし
+	*correction_power = 0;
+	return true;
+}
+/********************************************************************************
+*	姿勢を水平に近づける出力補正値獲得（ROLL補正とPITCH補正に使用する）
+********************************************************************************/
+static void Get_Horizontal_Level_Power(float val,int *correction_power)
+{
+	if(val < -2){
+		*correction_power= -20;
+		return ;
+	}
+	if(val > 2){
+		*correction_power= 20;
+		return ;
+	}
+	*correction_power = 0;
 }
 /*****************************************************************
 *	着陸
