@@ -187,10 +187,6 @@ TAG_EXIT:
 	PCA9685_pwmWrite(4, 0);
 	PCA9685_pwmWrite(NAZE32_BARO, 0);
 
-	VL53L0X_close(4);
-	VL53L0X_close(3);
-	VL53L0X_close(4);
-	VL53L0X_close(1);
 	VL53L0X_close(0);
 
 //	Ble_close();
