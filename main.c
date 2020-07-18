@@ -677,7 +677,7 @@ static int I2c_device_init(void)
     digitalWrite(VL53L0X_XSHUT_4_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_5_GPIO,LOW);
 
-retun -1;
+return -1;
 	//初期化
 //	if(VL53L0X_init(VL53L0X_XSHUT_1_GPIO,0x2a,0) != VL53L0X_ERROR_NONE){	//距離センサ 1 rigth
 //		printf("*** VL53L0X_init(0)err\n");
