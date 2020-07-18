@@ -157,7 +157,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-	if (Ble_init(BLE_BEACON_MAX, BLE_BEACON_ADR1, BLE_BEACON_ADR2, BLE_BEACON_ADR3, BLE_BEACON_ADR4) == -1)return -1;	//BLE初期化
+//	if (Ble_init(BLE_BEACON_MAX, BLE_BEACON_ADR1, BLE_BEACON_ADR2, BLE_BEACON_ADR3, BLE_BEACON_ADR4) == -1)return -1;	//BLE初期化
 	if(I2c_device_init() == -1)return -1;	//i2cデバイス初期化
 	if(Debug_Print_init() == -1)return -1;	//デバッグ出力用ファイル初期化
 //	BLHeli_init();							//BLHeli(ESC)初期化
@@ -193,7 +193,7 @@ TAG_EXIT:
 	VL53L0X_close(1);
 	VL53L0X_close(0);
 
-	Ble_close();
+//	Ble_close();
 
 	fclose(m_fp);
 	fclose(m_fpVL53L0X);
