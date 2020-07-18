@@ -215,7 +215,7 @@ static void Naze32_Main_Loop(void)
 	int nSaveHeight = 0;
 	int roll_power = 0; 		//roll補正値
 	int pitch_power = 0; 		//pitch補正値
-	
+
 	struct timeval tv_start;
 	struct timeval tv_now;
 	double dfFlightTimeStart;
@@ -375,7 +375,7 @@ static void Naze32_Main_Loop(void)
 			Get_Horizontal_Level_Power(m_AttitudeData.roll-3,&roll_power);
 		}
 		//モータ出力(ROLL)
-		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + roll_power));
+		PCA9685_pwmWrite(NAZE32_ROLL, (double)(NAZE32_NEUTRAL + roll_power));
 
 		//障害物回避用の出力補正値獲得(PITCH)
 		Get_Correction_Power(VL53L0X_Measurement[3],VL53L0X_Measurement[1],&pitch_power);
@@ -384,7 +384,7 @@ static void Naze32_Main_Loop(void)
 			Get_Horizontal_Level_Power(m_AttitudeData.pitch+4,&pitch_power);
 		}
 		//モータ出力(PITCH)
-		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + pitch_power));
+		PCA9685_pwmWrite(NAZE32_PITCH, (double)(NAZE32_NEUTRAL + pitch_power));
 
 
 		//モータ出力(throttle)
