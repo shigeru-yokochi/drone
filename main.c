@@ -677,7 +677,6 @@ static int I2c_device_init(void)
     digitalWrite(VL53L0X_XSHUT_3_GPIO,HIGH);
     digitalWrite(VL53L0X_XSHUT_4_GPIO,HIGH);
     digitalWrite(VL53L0X_XSHUT_5_GPIO,HIGH);
-return -1;
 
 
 	//初期化
