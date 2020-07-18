@@ -390,7 +390,7 @@ static void Naze32_Main_Loop(void)
 		//モータ出力(throttle)
 		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + nOffsetPower));
 
-		printf("power:%d time:%0.2lf VL53L0X(→.↓.←.↑.alt): %4d %4d %4d %4d %4d aay:%d\n", 
+		printf("power:%d time:%0.2lf VL53L0X(→.↓.←.↑.alt): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d\n", 
 			nOffsetPower, 
 			dfFlightTime, 
 			VL53L0X_Measurement[0],
@@ -398,8 +398,9 @@ static void Naze32_Main_Loop(void)
 			VL53L0X_Measurement[2],
 			VL53L0X_Measurement[3],
 			VL53L0X_Measurement[4],
-			m_AttitudeData.aay);
-
+			roll_power,
+			pitch_power);
+			
 	}	//for()
 
 
