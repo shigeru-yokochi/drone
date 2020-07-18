@@ -152,7 +152,10 @@ int main(int argc, char **argv)
 //	}
 //	return 0;
 //---------debug
-
+	if(wiringPiSetupGpio() == -1){
+        printf("wiringPiSetupGpio() error\n");
+        return -1;
+    }
 
 	if (Ble_init(BLE_BEACON_MAX, BLE_BEACON_ADR1, BLE_BEACON_ADR2, BLE_BEACON_ADR3, BLE_BEACON_ADR4) == -1)return -1;	//BLE初期化
 	if(I2c_device_init() == -1)return -1;	//i2cデバイス初期化
