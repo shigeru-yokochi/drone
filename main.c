@@ -304,7 +304,11 @@ static void Naze32_Main_Loop(void)
 //			printf("--- stop. Debug Time out. [%0.0lfs]\n",DEBUG_MAINLOOP_TO);
 //			break;
 //		}
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[4],4) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 Altitude
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 1 rigth
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[1],1) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 2 rear
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[2],2) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 3 left
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[3],3) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 4 front
+		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[4],4) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 5 Altitude
 
 
 
@@ -358,9 +362,18 @@ static void Naze32_Main_Loop(void)
 //		GetAttitudeControl(dfPower);//姿勢制御値獲得
 
 
-		//モータ出力
-		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + nOffsetPower));		//throttle
-		printf("OffsetPower:%d  FlightTime:%0.2lf VL53L0X:%d aay:%d\n", nOffsetPower, dfFlightTime, VL53L0X_Measurement[4],m_AttitudeData.aay);
+		//モータ出力(throttle)
+		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + nOffsetPower));
+
+		printf("power:%d time:%0.2lf VL53L0X(1..5): %4d %4d %4d %4d %4d aay:%d\n", 
+			nOffsetPower, 
+			dfFlightTime, 
+			VL53L0X_Measurement[0],
+			VL53L0X_Measurement[1],
+			VL53L0X_Measurement[2],
+			VL53L0X_Measurement[3],
+			VL53L0X_Measurement[4],
+			m_AttitudeData.aay);
 
 	}	//for()
 
