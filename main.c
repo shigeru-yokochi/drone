@@ -213,7 +213,9 @@ static void Naze32_Main_Loop(void)
 	int nOffsetPower = OFFSET_POWER;
 	int nMode= 0;		//最大地上高検知:1
 	int nSaveHeight = 0;
-
+	int roll_power = 0; 		//roll補正値
+	int pitch_power = 0; 		//pitch補正値
+	
 	struct timeval tv_start;
 	struct timeval tv_now;
 	double dfFlightTimeStart;
