@@ -49,7 +49,7 @@ VL53L0X_Error VL53L0X_init(uint16_t xshut_gpio,uint16_t i2c_address,uint16_t dev
     // xshutをlow-highにしてi2cアドレスをdefaultの0x29で初期化する
     digitalWrite(xshut_gpio,LOW);
     digitalWrite(xshut_gpio,HIGH);
-    usleep(100000); //100ms
+    usleep(200000); //200ms
     m_pMyDevice[device_id]->fd = VL53L0X_i2c_init("/dev/i2c-1", 0x29); //choose between i2c-0 and i2c-1; On the raspberry pi zero, i2c-1 are pins 2 and 3 
     //i2cアドレス指定して再度初期化
     m_pMyDevice[device_id]->I2cDevAddr      = i2c_address;
