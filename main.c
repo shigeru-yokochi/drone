@@ -200,10 +200,6 @@ TAG_EXIT:
 	
 
 	VL53L0X_close(4);
-	VL53L0X_close(3);
-	VL53L0X_close(2);
-	VL53L0X_close(1);
-	VL53L0X_close(0);
 
 	Ble_close();
 
@@ -291,10 +287,10 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 
 
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 1
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[1],1) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 2
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[2],2) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 3
-		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[3],3) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 4
+//		if(c_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 1
+//		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[1],1) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 2
+//		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[2],2) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 3
+//		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[3],3) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 4
 		save_altitude = VL53L0X_Measurement[4];												//前回の高度を保存
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[4],4) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 5 高度
 
@@ -342,23 +338,6 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 
 
-		//障害物回避用の出力補正値獲得(ROLL)
-		Get_Correction_Power(VL53L0X_Measurement[0],VL53L0X_Measurement[2],&roll_power);
-		//姿勢を水平に近づける出力補正値獲得（ROLL）
-		if(roll_power == 0){
-			Get_Horizontal_Level_Power(m_AttitudeData.roll-3,&roll_power);
-		}
-		//モータ出力(ROLL)
-		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + roll_power));
-
-		//障害物回避用の出力補正値獲得(PITCH)
-		Get_Correction_Power(VL53L0X_Measurement[3],VL53L0X_Measurement[1],&pitch_power);
-		//姿勢を水平に近づける出力補正値獲得（PITCH）
-		if(pitch_power == 0){
-			Get_Horizontal_Level_Power(m_AttitudeData.pitch+4,&pitch_power);
-		}
-		//モータ出力(PITCH)
-		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH, (double)(BETAFPV_F4_2S_AIO_NEUTRAL + pitch_power));
 
 		//高度制御イベント値
 		altitude_event = Get_Altitude_Ctrl_Event(VL53L0X_Measurement[4],save_altitude);	
@@ -367,13 +346,9 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 
 
-		printf("Power %d time %0.2lf VL53L0X(1..5): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d MPU6050(yaw,roll,pitch) %4.2lf %4.2lf %4.2lf\n", 
+		printf("Power %d time %0.2lf VL53L0X: %4d roll_power %4d pitch_power %4d MPU6050(yaw,roll,pitch) %4.2lf %4.2lf %4.2lf\n", 
 				altitude_power, 
 				dfFlightTime, 
-				VL53L0X_Measurement[0],
-				VL53L0X_Measurement[1],
-				VL53L0X_Measurement[2],
-				VL53L0X_Measurement[3],
 				VL53L0X_Measurement[4],
 				roll_power,
 				pitch_power,
@@ -826,32 +801,32 @@ static void BLHeli_init(void)
 static int I2c_device_init(void)
 {
 	//L53L0Xを複数使用するためxshutをlowにする
-   	pinMode(VL53L0X_XSHUT_1_GPIO,OUTPUT);
-   	pinMode(VL53L0X_XSHUT_2_GPIO,OUTPUT);
-   	pinMode(VL53L0X_XSHUT_3_GPIO,OUTPUT);
-   	pinMode(VL53L0X_XSHUT_4_GPIO,OUTPUT);
+  // 	pinMode(VL53L0X_XSHUT_1_GPIO,OUTPUT);
+  // 	pinMode(VL53L0X_XSHUT_2_GPIO,OUTPUT);
+  // 	pinMode(VL53L0X_XSHUT_3_GPIO,OUTPUT);
+  // 	pinMode(VL53L0X_XSHUT_4_GPIO,OUTPUT);
    	pinMode(VL53L0X_XSHUT_5_GPIO,OUTPUT);
-    digitalWrite(VL53L0X_XSHUT_1_GPIO,LOW);
-    digitalWrite(VL53L0X_XSHUT_2_GPIO,LOW);
-    digitalWrite(VL53L0X_XSHUT_3_GPIO,LOW);
-    digitalWrite(VL53L0X_XSHUT_4_GPIO,LOW);
+  //  digitalWrite(VL53L0X_XSHUT_1_GPIO,LOW);
+  //  digitalWrite(VL53L0X_XSHUT_2_GPIO,LOW);
+  //  digitalWrite(VL53L0X_XSHUT_3_GPIO,LOW);
+  //  digitalWrite(VL53L0X_XSHUT_4_GPIO,LOW);
     digitalWrite(VL53L0X_XSHUT_5_GPIO,LOW);
-	if(VL53L0X_init(VL53L0X_XSHUT_1_GPIO,0x2a,0) != VL53L0X_ERROR_NONE){	//距離センサ 1
-		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
-	if(VL53L0X_init(VL53L0X_XSHUT_2_GPIO,0x2b,1) != VL53L0X_ERROR_NONE){	//距離センサ 2
-		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
-	if(VL53L0X_init(VL53L0X_XSHUT_3_GPIO,0x2c,2) != VL53L0X_ERROR_NONE){	//距離センサ 3
-		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
-	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x2d,3) != VL53L0X_ERROR_NONE){	//距離センサ 4
-		printf("*** VL53L0X_init()err\n");
-		return -1;
-	}
+//	if(VL53L0X_init(VL53L0X_XSHUT_1_GPIO,0x2a,0) != VL53L0X_ERROR_NONE){	//距離センサ 1
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
+//	if(VL53L0X_init(VL53L0X_XSHUT_2_GPIO,0x2b,1) != VL53L0X_ERROR_NONE){	//距離センサ 2
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
+//	if(VL53L0X_init(VL53L0X_XSHUT_3_GPIO,0x2c,2) != VL53L0X_ERROR_NONE){	//距離センサ 3
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
+//	if(VL53L0X_init(VL53L0X_XSHUT_4_GPIO,0x2d,3) != VL53L0X_ERROR_NONE){	//距離センサ 4
+//		printf("*** VL53L0X_init()err\n");
+//		return -1;
+//	}
 	if(VL53L0X_init(VL53L0X_XSHUT_5_GPIO,0x2e,4) != VL53L0X_ERROR_NONE){	//距離センサ 5 Altitude
 		printf("*** VL53L0X_init()err\n");
 		return -1;
