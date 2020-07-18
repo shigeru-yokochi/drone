@@ -699,7 +699,7 @@ static int I2c_device_init(void)
 		return -1;
 	}
 	printf("--- VL53L0X_init() OK\n");
-return -1;/
+return -1;
 
 	if(MPU6050_init() != 0){						//ジャイロ加速度センサ
 		printf("*** MPU6050_init()err\n");
