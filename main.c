@@ -92,6 +92,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 
 //NAZE32
 #define	NAZE32_NEUTRAL			1563
+#define	NAZE32_ROLL_NEUTRAL		NAZE32_NEUTRAL -20
+#define	NAZE32_PITCH_NEUTRAL	NAZE32_NEUTRAL +20
 #define	NAZE32_NEUTRAL_THROTTLE	950
 #define	NAZE32_ARM_OFF			1000
 #define	NAZE32_ARM_ON			1563
@@ -224,8 +226,8 @@ static void Naze32_Main_Loop(void)
 
 
 	//naze32 init
-	PCA9685_pwmWrite(NAZE32_ROLL	, NAZE32_NEUTRAL);
-	PCA9685_pwmWrite(NAZE32_PITCH	, NAZE32_NEUTRAL);
+	PCA9685_pwmWrite(NAZE32_ROLL	, NAZE32_ROLL_NEUTRAL);
+	PCA9685_pwmWrite(NAZE32_PITCH	, NAZE32_PITCH_NEUTRAL);
 	PCA9685_pwmWrite(NAZE32_YAW		, NAZE32_NEUTRAL);
 	PCA9685_pwmWrite(NAZE32_THROTTLE, NAZE32_NEUTRAL_THROTTLE);
 	PCA9685_pwmWrite(NAZE32_ARM		, NAZE32_ARM_OFF);
@@ -375,7 +377,7 @@ static void Naze32_Main_Loop(void)
 	//		Get_Horizontal_Level_Power(m_AttitudeData.roll-3,&roll_power);
 	//	}
 		//モータ出力(ROLL)
-		PCA9685_pwmWrite(NAZE32_ROLL, (double)(NAZE32_NEUTRAL + roll_power));
+		PCA9685_pwmWrite(NAZE32_ROLL, (double)(NAZE32_ROLL_NEUTRAL + roll_power));
 
 		//障害物回避用の出力補正値獲得(PITCH)
 		Get_Correction_Power(VL53L0X_Measurement[3],VL53L0X_Measurement[1],&pitch_power);
@@ -384,13 +386,13 @@ static void Naze32_Main_Loop(void)
 	//		Get_Horizontal_Level_Power(m_AttitudeData.pitch+4,&pitch_power);
 	//	}
 		//モータ出力(PITCH)
-		PCA9685_pwmWrite(NAZE32_PITCH, (double)(NAZE32_NEUTRAL + pitch_power));
+		PCA9685_pwmWrite(NAZE32_PITCH, (double)(NAZE32_PITCH_NEUTRAL + pitch_power));
 
 
 		//モータ出力(throttle)
 		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + nOffsetPower));
 
-		printf("power:%d time:%0.2lf VL53L0X(←.→.↑.↓.alt): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d\n", 
+		printf("power: %d time: %0.2lf VL53L0X(←.→.↑.↓.alt): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d\n", 
 			nOffsetPower, 
 			dfFlightTime, 
 			VL53L0X_Measurement[2],
