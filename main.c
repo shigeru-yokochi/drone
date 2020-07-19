@@ -104,8 +104,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define NAZE32_ARM				4
 #define NAZE32_BARO				15
 #define THRESHOLD_DISTANCE 250	//障害物回避距離(mm)
-#define CORRECTION_POWER_P 50	//障害物回避用の出力補正値
-#define CORRECTION_POWER_N -50	//障害物回避用の出力補正値
+#define CORRECTION_POWER_P 100	//障害物回避用の出力補正値
+#define CORRECTION_POWER_N -100	//障害物回避用の出力補正値
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高
 #define MAXIMUM_GROUND_CLEARANCE	500	//最大地上高(できるだけ高くするmax500目標)
@@ -439,12 +439,12 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 			return false;
 		}
 		//マイナス補正
-		*correction_power = CORRECTION_POWER_P;
+		*correction_power = CORRECTION_POWER_N;
 		return true;
 	}
 	//プラス補正
 	if(d2 < THRESHOLD_DISTANCE){
-		*correction_power = CORRECTION_POWER_N;
+		*correction_power = CORRECTION_POWER_P;
 		return true;
 	}
 	//補正なし
