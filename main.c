@@ -369,7 +369,7 @@ static void Naze32_Main_Loop(void)
 
 
 		//障害物回避用の出力補正値獲得(ROLL)
-		Get_Correction_Power(VL53L0X_Measurement[2],VL53L0X_Measurement[0],&roll_power);
+		Get_Correction_Power(VL53L0X_Measurement[0],VL53L0X_Measurement[2],&roll_power);
 		//姿勢を水平に近づける出力補正値獲得（ROLL）
 	//	if(roll_power == 0){
 	//		Get_Horizontal_Level_Power(m_AttitudeData.roll-3,&roll_power);
@@ -439,12 +439,12 @@ static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power)
 			return false;
 		}
 		//マイナス補正
-		*correction_power = CORRECTION_POWER_N;
+		*correction_power = CORRECTION_POWER_P;
 		return true;
 	}
 	//プラス補正
 	if(d2 < THRESHOLD_DISTANCE){
-		*correction_power = CORRECTION_POWER_P;
+		*correction_power = CORRECTION_POWER_N;
 		return true;
 	}
 	//補正なし
