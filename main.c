@@ -427,6 +427,41 @@ static void Naze32_Main_Loop(void)
 
 }
 /********************************************************************************
+*	上昇出力制御
+********************************************************************************/
+/*
+static void take_off_power(int *pow,int *alt)
+{
+	#define TAKEOFF_RATE	10	//上昇率(mm)
+	#define TAKEOFF_POWER	5
+
+	//前々回高度 < 前回高度
+	if(m_x2_alt < m_x1_alt){
+		//前回高度 < 今回高度
+		if(m_x1_alt < *alt){
+			(*pow) -= TAKEOFF_POWER;
+		}
+		else{
+			(*pow)+=TAKEOFF_POWER;
+		}
+	}
+	else{
+		(*pow)+=TAKEOFF_POWER;
+
+	}
+
+	if(m_x1_alt < *alt + TAKEOFF_RATE){
+		(*pow)+=TAKEOFF_POWER;
+	}
+	else{
+		(*pow)-= TAKEOFF_POWER;
+
+	}
+
+}
+*/
+
+/********************************************************************************
 *	障害物回避用の出力補正値獲得（ROLL補正とPITCH補正に使用する）
 * 進行方向の障害物との距離がTHRESHOLD_DISTANCE未満になった場合、進行方向を逆にする
 * 進行方向と進行逆方向とも障害物との距離がTHRESHOLD_DISTANCE未満になった場合、failになる
