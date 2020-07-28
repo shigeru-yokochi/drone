@@ -93,7 +93,7 @@ static FILE *m_fp,*m_fpVL53L0X;
 //NAZE32
 #define	NAZE32_NEUTRAL			1563
 #define	NAZE32_ROLL_NEUTRAL		NAZE32_NEUTRAL -20
-#define	NAZE32_PITCH_NEUTRAL	NAZE32_NEUTRAL +20
+#define	NAZE32_PITCH_NEUTRAL	NAZE32_NEUTRAL +30
 #define	NAZE32_NEUTRAL_THROTTLE	950
 #define	NAZE32_ARM_OFF			1000
 #define	NAZE32_ARM_ON			1563
@@ -106,8 +106,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define NAZE32_ARM				4
 #define NAZE32_BARO				15
 #define THRESHOLD_DISTANCE 250	//障害物回避距離(mm)
-#define CORRECTION_POWER_P 200	//障害物回避用の出力補正値
-#define CORRECTION_POWER_N -200	//障害物回避用の出力補正値
+#define CORRECTION_POWER_P 150	//障害物回避用の出力補正値
+#define CORRECTION_POWER_N -150	//障害物回避用の出力補正値
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高
 #define MAXIMUM_GROUND_CLEARANCE	600	//最大地上高(できるだけ高くするmax500目標)
