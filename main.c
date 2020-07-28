@@ -106,8 +106,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define NAZE32_ARM				4
 #define NAZE32_BARO				15
 #define THRESHOLD_DISTANCE 250	//障害物回避距離(mm)
-#define CORRECTION_POWER_P 100	//障害物回避用の出力補正値
-#define CORRECTION_POWER_N -100	//障害物回避用の出力補正値
+#define CORRECTION_POWER_P 200	//障害物回避用の出力補正値
+#define CORRECTION_POWER_N -200	//障害物回避用の出力補正値
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高
 #define MAXIMUM_GROUND_CLEARANCE	600	//最大地上高(できるだけ高くするmax500目標)
