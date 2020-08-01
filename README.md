@@ -6,7 +6,7 @@ Raspberry Pi Zero で自律飛行ドローン作成
 
 ![スクリーンショット 2020-07-28 20 43 59](https://user-images.githubusercontent.com/12773136/88665623-dcfa4c00-d119-11ea-9e1c-071c06218d26.png)
 
-[![IMAGE ALT TEXT HERE](http://i.ytimg.com/vi/l3_lmeqfvos/hqdefault.jpg)](https://www.youtube.com/watch?v=l3_lmeqfvos)
+[![IMAGE ALT TEXT HERE](http://i.ytimg.com/vi/JrEqpENNYcE/hqdefault.jpg)](https://www.youtube.com/watch?v=JrEqpENNYcE)
 
 
 
