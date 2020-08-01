@@ -112,10 +112,10 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define CORRECTION_POWER_N -150	//障害物回避用の出力補正値
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高
-#define MAXIMUM_GROUND_CLEARANCE	600	//最大地上高(できるだけ高くするmax500目標)
+#define MAXIMUM_GROUND_CLEARANCE	400	//最大地上高(できるだけ高くするmax500目標)
 
-#define DEBUG_MAINLOOP_TO			15	//デバッグ用メインループタイムアウト指定(sec)
-#define FLIGHT_TIME					17	//landing time = FLIGHT_TIME - DEBUG_MAINLOOP_TO
+#define DEBUG_MAINLOOP_TO			5	//デバッグ用メインループタイムアウト指定(sec)
+#define FLIGHT_TIME					7	//landing time = FLIGHT_TIME - DEBUG_MAINLOOP_TO
 #define TAKEOFF_POWER				650
 #define LANDING_POWER				500
 
@@ -424,7 +424,7 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
                 *status = 3;
             }
             if(event == 4){
-                (*correction_power)+=20;
+                (*correction_power)+=10;
             }
             if(event == 5){
                 *correction_power = LANDING_POWER;
