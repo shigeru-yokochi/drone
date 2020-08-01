@@ -112,7 +112,7 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define CORRECTION_POWER_N -150	//障害物回避用の出力補正値
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高
-#define MAXIMUM_GROUND_CLEARANCE	400	//最大地上高(できるだけ高くするmax500目標)
+#define MAXIMUM_GROUND_CLEARANCE	500	//最大地上高(できるだけ高くするmax500目標)
 
 #define DEBUG_MAINLOOP_TO			7	//デバッグ用メインループタイムアウト指定(sec)
 #define FLIGHT_TIME					5	//landing time = FLIGHT_TIME - DEBUG_MAINLOOP_TO
