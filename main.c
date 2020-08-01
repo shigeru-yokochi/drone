@@ -239,6 +239,8 @@ static void Naze32_Main_Loop(void)
 	PCA9685_pwmWrite(NAZE32_ARM		, NAZE32_ARM_OFF);
 	printf("--- BARO ON\n");
 	PCA9685_pwmWrite(NAZE32_BARO	, NAZE32_BARO_ON);
+
+	sleep(1);
 	printf("--- arming start\n");
 	PCA9685_pwmWrite(NAZE32_ARM, NAZE32_ARM_ON);
 	sleep(1);
