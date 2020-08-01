@@ -365,7 +365,7 @@ static void Naze32_Main_Loop(void)
 		//throttle
 		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + altitude_power));
 
-		printf("power: %d time: %0.2lf VL53L0X(←.→.↑.↓.alt): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d\n", 
+		printf("power: %d time: %0.2lf VL53L0X(←.→.↑.↓.alt): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d status %2d\n", 
 			altitude_power, 
 			dfFlightTime, 
 			VL53L0X_Measurement[2],
@@ -374,7 +374,8 @@ static void Naze32_Main_Loop(void)
 			VL53L0X_Measurement[1],
 			VL53L0X_Measurement[4],
 			roll_power,
-			pitch_power);
+			pitch_power,
+			altitude_status);
 
 	}	//for()
 
