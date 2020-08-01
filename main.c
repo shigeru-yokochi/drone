@@ -361,6 +361,7 @@ static void Naze32_Main_Loop(void)
 
 		//高度制御イベント値
         altitude_event = Get_Altitude_Ctrl_Event(VL53L0X_Measurement[4],save_altitude); 
+		save_altitude = VL53L0X_Measurement[4];
         Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
 		//throttle
 		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + altitude_power));
