@@ -51,7 +51,7 @@ static void Naze32_Main_Loop(void);
 static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power);
 static void Get_Horizontal_Level_Power(float val,int *correction_power);
 static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save);
-static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power);
+static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power,int altitude);
 
 //BLE BEACON
 #define BLE_BEACON_MAX	2	//1個使用 最大4個
@@ -255,7 +255,7 @@ static void Naze32_Main_Loop(void)
 
   	//上昇開始
     altitude_event = 1;
-    Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
+    Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power,0);
     //throttle
     PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + altitude_power));
 
@@ -277,7 +277,7 @@ static void Naze32_Main_Loop(void)
 		if (dfFlightTime > FLIGHT_TIME) {
             //ランディング開始
             altitude_event = 5;
-            Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
+            Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power,0);
             //throttle
             PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + altitude_power));
         }
@@ -363,7 +363,7 @@ static void Naze32_Main_Loop(void)
 		//高度制御イベント値
         altitude_event = Get_Altitude_Ctrl_Event(VL53L0X_Measurement[4],save_altitude); 
 		save_altitude = VL53L0X_Measurement[4];
-        Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
+        Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power,VL53L0X_Measurement[4]);
 		//throttle
 		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + altitude_power));
 
@@ -398,7 +398,7 @@ static void Naze32_Main_Loop(void)
 ********************************************************************************/
 static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save)
 {
-    //10mmを超えた下降検知
+   //10mmを超えた下降検知
     if(alt+10 < alt_save){
         return 4;
     }
@@ -410,7 +410,7 @@ static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save)
 /********************************************************************************
 *   高度制御出力取得
 ********************************************************************************/
-static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
+static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power,int altitude)
 {
     switch(*status){
         case 1:
@@ -433,10 +433,6 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
             }
             return true;
         case 3:
-            if(event == 2){
-                *correction_power = TAKEOFF_POWER;
-                *status = 2;
-            }
             if(event == 4){
                 *correction_power = TAKEOFF_POWER;
                 *status = 4;
@@ -447,8 +443,11 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
             }
             return true;
         case 4:
-            if(event == 2){
-                *status = 2;
+            if(event == 4){
+				if(altitude < MAXIMUM_GROUND_CLEARANCE){
+	               	*correction_power = TAKEOFF_POWER;
+    	            *status = 2;
+				}
             }
             if(event == 5){
                 *correction_power = LANDING_POWER;
