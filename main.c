@@ -114,8 +114,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高
 #define MAXIMUM_GROUND_CLEARANCE	600	//最大地上高(できるだけ高くするmax500目標)
 
-#define DEBUG_MAINLOOP_TO			17	//デバッグ用メインループタイムアウト指定(sec)
-#define FLIGHT_TIME					5	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
+#define DEBUG_MAINLOOP_TO			15	//デバッグ用メインループタイムアウト指定(sec)
+#define FLIGHT_TIME					17	//landing time = FLIGHT_TIME - DEBUG_MAINLOOP_TO
 #define TAKEOFF_POWER				650
 #define LANDING_POWER				500
 
@@ -365,7 +365,7 @@ static void Naze32_Main_Loop(void)
 		//throttle
 		PCA9685_pwmWrite(NAZE32_THROTTLE, (double)(NAZE32_NEUTRAL_THROTTLE + altitude_power));
 
-		printf("power: %d time: %0.2lf VL53L0X(←.→.↑.↓.alt): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d status %2d\n", 
+		printf("power: %d time: %0.2lf VL53L0X(←.→.↑.↓.alt): %4d %4d %4d %4d %4d roll_power %4d pitch_power %4d event %2d status %2d\n", 
 			altitude_power, 
 			dfFlightTime, 
 			VL53L0X_Measurement[2],
@@ -375,6 +375,7 @@ static void Naze32_Main_Loop(void)
 			VL53L0X_Measurement[4],
 			roll_power,
 			pitch_power,
+			altitude_event,
 			altitude_status);
 
 	}	//for()
