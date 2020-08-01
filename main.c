@@ -396,8 +396,8 @@ static void Naze32_Main_Loop(void)
 ********************************************************************************/
 static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save)
 {
-    //50mmを超えた下降検知
-    if(alt+50 < alt_save){
+    //10mmを超えた下降検知
+    if(alt+10 < alt_save){
         return 4;
     }
     if(alt > MAXIMUM_GROUND_CLEARANCE){
