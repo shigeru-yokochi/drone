@@ -117,7 +117,7 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define DEBUG_MAINLOOP_TO			6	//デバッグ用メインループタイムアウト指定(sec)
 #define FLIGHT_TIME					4	//landing time = FLIGHT_TIME - DEBUG_MAINLOOP_TO
 #define TAKEOFF_POWER				600
-#define LANDING_POWER				500
+#define LANDING_POWER				525
 
 
 //姿勢制御用データ格納用
