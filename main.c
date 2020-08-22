@@ -28,8 +28,8 @@ extern VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint
 //MPU6050
 extern uint8_t MPU6050_init();
 extern void MPU6050_GetMeasurements(float *yaw,float *pitch,float *roll, int *aax, int *aay, int *aaz, FILE *fplog);
-#define HORIZONTAL_CALIBRATION_ROLL -2.4 //MPU6050補正値  左に移動する場合はマイナスを強くする
-#define HORIZONTAL_CALIBRATION_PITCH 2.9 //MPU6050補正値
+#define HORIZONTAL_CALIBRATION_ROLL -3.4 //MPU6050補正値  左に移動する場合はマイナスを強くする
+#define HORIZONTAL_CALIBRATION_PITCH 1.9 //MPU6050補正値  前に移動する場合はマイナスを強くする
 
 //PCA9685
 extern int PCA9685_init(void);
