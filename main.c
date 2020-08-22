@@ -28,6 +28,9 @@ extern VL53L0X_Error VL53L0X_GetMeasurements(uint16_t *pVL53L0X_Measurement,uint
 //MPU6050
 extern uint8_t MPU6050_init();
 extern void MPU6050_GetMeasurements(float *yaw,float *pitch,float *roll, int *aax, int *aay, int *aaz, FILE *fplog);
+#define HORIZONTAL_CALIBRATION_ROLL -1.4 //MPU6050補正値
+#define HORIZONTAL_CALIBRATION_PITCH 2.9 //MPU6050補正値
+
 //PCA9685
 extern int PCA9685_init(void);
 extern void PCA9685_pwmWrite(uint8_t ch, double pulseWidth_usec);
@@ -111,7 +114,6 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define THRESHOLD_DISTANCE 250	//障害物回避距離(mm)
 #define CORRECTION_POWER_P 50	//障害物回避用の出力補正値
 #define CORRECTION_POWER_N -50	//障害物回避用の出力補正値
-
 
 #define MINIMUM_GROUND_CLEARANCE	40	//最小地上高(mm)
 #define MAXIMUM_GROUND_CLEARANCE	500	//最大地上高(mm)
@@ -305,8 +307,18 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 //		GetAttitudeControl(dfPower);//姿勢制御値獲得
 
 
+		//姿勢制御(roll test中)
+		if(m_AttitudeData.roll + HORIZONTAL_CALIBRATION_ROLL > 3){
+			roll_power = 10;
+		}
+		else if(m_AttitudeData.roll + HORIZONTAL_CALIBRATION_ROLL < -3){
+			roll_power = -10;
+		}
+		else{
+			roll_power = 0;
 
-
+		}
+		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL		, BETAFPV_F4_2S_AIO_NEUTRAL + roll_power);
 
 		//高度制御イベント値
 		altitude_event = Get_Altitude_Ctrl_Event(VL53L0X_Measurement[4],save_altitude);	
