@@ -1,6 +1,8 @@
 # drone
 Raspberry Pi Zero で自律飛行ドローン作成
 
+--- 
+
 ## master branch
 
 
@@ -10,7 +12,6 @@ Raspberry Pi Zero で自律飛行ドローン作成
 
 
 ![image](https://user-images.githubusercontent.com/12773136/43676234-212db9b6-9828-11e8-9b9b-e0dd015f0483.PNG)
-
 
 
 ### Reference
@@ -36,6 +37,7 @@ https://qiita.com/shigeru-yokochi/items/7f74ccf200a57388e241
 
 https://www.yokochi.jp/post/betafpv-f4-2s-aio2/
 
+---
 
 ## VL53L0X_multi_test branch (master -> betafpv -> VL53L0X_multi_test)
 
@@ -47,6 +49,7 @@ https://www.yokochi.jp/post/betafpv-f4-2s-aio2/
 
 https://qiita.com/shigeru-yokochi/items/f996d495effdf6dea3fc
 
+---
 
 ## QAV210 branch (master -> QAV210)
 
@@ -80,7 +83,7 @@ https://qiita.com/shigeru-yokochi/items/f996d495effdf6dea3fc
 - 前後(左右)両方の距離が閾値を超えている場合はエラーとする（今回は何も処理しない）
 - 逆方向へ移動する出力は固定とする（とりあえず）
 
-
+---
 
 ## betafpv_VL53L0X_single branch (master -> betafpv -> betafpv_VL53L0X_single)
 
