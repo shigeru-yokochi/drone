@@ -103,6 +103,30 @@ https://qiita.com/shigeru-yokochi/items/f996d495effdf6dea3fc
 |  4 <br>下降検知 |   |power+10 |TAKEOFF_POWER<br>status=4|設定高度未満の場合、TAKEOFF_POWER<br>status=2|
 |  5 <br>ランディング |    |LANDING_POWER<br>status=5 |LANDING_POWER<br>status=5 |LANDING_POWER<br>status=5 |
 
+### 姿勢制御方法
+
+MPU6050より機体の傾斜を検出してrollとpitchの出力値を変更している（debug中）
+
+### PID制御
+
+未実装
+
+### BLE制御
+
+未実装
+
+### 衝突防止方法
+
+未実装
+
+### ジャイロ
+
+未実装
+
+### 気圧センサー
+
+未実装
+
 ### Reference
 
 https://www.yokochi.jp/post/betafpv-f4-2s-aio2/
