@@ -10,7 +10,7 @@ Raspberry Pi Zero で自律飛行ドローン作成
 ![グラフ](https://user-images.githubusercontent.com/12773136/89097762-be979780-d41c-11ea-82b3-c3a84aab72ab.png)
 
 
-[![youtube movie](http://i.ytimg.com/vi/JrEqpENNYcE/hqdefault.jpg)](https://www.youtube.com/watch?v=JrEqpENNYcE)
+[![youtube movie](https://i.ytimg.com/vi/JrEqpENNYcE/hqdefault.jpg)](https://www.youtube.com/watch?v=JrEqpENNYcE)
 
 
 ## 高度を維持する方法
@@ -31,8 +31,23 @@ Raspberry Pi Zero で自律飛行ドローン作成
 - 前後(左右)両方の距離が閾値を超えている場合はエラーとする（今回は何も処理しない）
 - 逆方向へ移動する出力は固定とする（とりあえず）
 
+### 姿勢制御方法
 
-# 参照
+未実装
 
-TBD
+### PID制御
+
+未実装
+
+### BLE制御
+
+未実装
+
+### ジャイロ
+
+未実装
+
+### 気圧センサー
+
+フライトコントローラーに内蔵されているものを使用
 
