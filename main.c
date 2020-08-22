@@ -118,10 +118,10 @@ static FILE *m_fp,*m_fpVL53L0X;
 
 #define DEBUG_MAINLOOP_TO			5	//デバッグ用メインループタイムアウト指定(sec)
 #define FLIGHT_TIME					4	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
-#define CLIMB_POWER 				450
-#define LANDING_POWER 				350
-//#define CLIMB_POWER 				50	//飛ばないテスト用
-//#define LANDING_POWER 			30
+//#define CLIMB_POWER 				450
+//#define LANDING_POWER 				350
+#define CLIMB_POWER 				50	//飛ばないテスト用
+#define LANDING_POWER 			30
 
 
 //姿勢制御用データ格納用
@@ -150,19 +150,6 @@ static struct_AttitudeData m_AttitudeData;
 ********************************************************************************/
 int main(int argc, char **argv)
 {
-//debug-------------
-//	int i, nHeadPower[4];
-//	for (i = 0; i < 360; i++) {
-//		memset(nHeadPower, 0, sizeof(nHeadPower));
-//		HeadNorth(i, &nHeadPower[0], &nHeadPower[1], &nHeadPower[2], &nHeadPower[3]);//北に向かう
-//		printf("%03d:%03d %03d %03d %03d (%d)(%d)(%d)(%d)\n", i, nHeadPower[0], nHeadPower[1], nHeadPower[2], nHeadPower[3],
-//			nHeadPower[0] + nHeadPower[2],
-//			nHeadPower[2] + nHeadPower[1],
-//			nHeadPower[1] + nHeadPower[3],
-//			nHeadPower[3] + nHeadPower[0]);
-//	}
-//	return 0;
-//---------debug
 
 	if(wiringPiSetupGpio() == -1){
         printf("wiringPiSetupGpio() error\n");
@@ -172,11 +159,6 @@ int main(int argc, char **argv)
 	if (Ble_init(BLE_BEACON_MAX, BLE_BEACON_ADR1, BLE_BEACON_ADR2, BLE_BEACON_ADR3, BLE_BEACON_ADR4) == -1)return -1;	//BLE初期化
 	if(I2c_device_init() == -1)return -1;	//i2cデバイス初期化
 	if(Debug_Print_init() == -1)return -1;	//デバッグ出力用ファイル初期化
-//	BLHeli_init();							//BLHeli(ESC)初期化
-//	if(PwmBarance() == -1)goto TAG_EXIT;	//各pwmの出力調整
-
-
-//goto TAG_EXIT;
 
 	//PID制御値初期化
 	m_fDiffP[0] = 0.;
@@ -218,13 +200,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 {
 	uint16_t VL53L0X_Measurement[VL53L0X_MAX];		//VL53L0X_MAX台分の測定値(mm)
 	uint16_t save_altitude = 0;						//前回の高度を保存
-//	char tmp[256];
-//	double dfPower[4];		//pwm1..4の個別用出力調整値
-//	int nHeadPower[4];		//指定方向へ移動するための出力値
-//	int nDirection;
-//	int nOffsetPower = OFFSET_POWER;
-//	int nMode= 0;		//最大地上高検知:1
-//	int nSaveHeight = 0;
+
 	int roll_power = 0; 		//roll補正値
 	int pitch_power = 0; 		//pitch補正値
 	int altitude_event  = 1;  	//高度制御イベント値
@@ -234,7 +210,6 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 	struct timeval tv_now;
 	double dfFlightTimeStart;
 	double dfFlightTime;
-//	double dfFlightTimeSave=0.;
 
 
 	//BETAFPV_F4_2S_AIO init
@@ -285,14 +260,6 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 			PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 		}
 
-
-
-
-
-//		if(c_GetMeasurements(&VL53L0X_Measurement[0],0) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 1
-//		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[1],1) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 2
-//		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[2],2) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 3
-//		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[3],3) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 4
 		save_altitude = VL53L0X_Measurement[4];												//前回の高度を保存
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[4],4) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 5 高度
 
@@ -373,17 +340,6 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 	sleep(1);	
 
 
-//test	
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM, BETAFPV_F4_2S_AIO_ARM_ON);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL		, 1600);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH	, 1700);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_YAW		, 1800);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE	, 1900);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_AUX2		, 1800);
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_AUX3		, 1700);
-//	sleep(5);	
-//	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ARM, BETAFPV_F4_2S_AIO_ARM_OFF);
-//	sleep(1);	
 
 }
 /********************************************************************************
