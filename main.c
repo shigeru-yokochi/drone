@@ -54,7 +54,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void);
 static bool Get_Correction_Power(uint16_t d1,uint16_t d2,int *correction_power);
 static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save);
 static void Get_Horizontal_Level_Power(float val,int *correction_power);
-static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power);
+static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power,int altitude);
 
 //BLE BEACON
 #define BLE_BEACON_MAX	2	//1個使用 最大4個
@@ -236,7 +236,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 	//上昇開始
 	altitude_event = 1;
-	Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
+	Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power,0);
 	//throttle
 	PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 
@@ -257,7 +257,7 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		if (dfFlightTime > FLIGHT_TIME) {
 			//ランディング開始
 			altitude_event = 5;
-			Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
+			Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power,0);
 			//throttle
 			PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 		}
