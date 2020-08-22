@@ -120,8 +120,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 #define FLIGHT_TIME					4	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
 //#define CLIMB_POWER 				550
 //#define LANDING_POWER 			450
-#define CLIMB_POWER 				350	//飛ばないテスト用
-#define LANDING_POWER 				250
+#define CLIMB_POWER 				200	//飛ばないテスト用
+#define LANDING_POWER 				100
 
 
 //姿勢制御用データ格納用
