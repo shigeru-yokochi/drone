@@ -144,8 +144,7 @@ void MPU6050_GetMeasurements(float *yaw,float *pitch,float *roll,int *aax, int *
         // reset so we can continue cleanly
         mpu.resetFIFO();
         printf("+++ FIFO overflow reset!\n");
-        usleep(100000);  //100ms
-//		sleep(1);
+        usleep(10000);  //10ms
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
     } else if (fifoCount >= 42) {
