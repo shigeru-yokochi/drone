@@ -458,7 +458,7 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power,
             return true;
         case 3:
             if(event == 4){
-                *correction_power = CLIMB_POWER;
+//                *correction_power = CLIMB_POWER;
                 *status = 4;
             }
             if(event == 5){
