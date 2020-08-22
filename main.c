@@ -320,6 +320,20 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		}
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_ROLL		, BETAFPV_F4_2S_AIO_NEUTRAL + roll_power);
 
+		//姿勢制御(pitch test中)
+		if(m_AttitudeData.pitch + HORIZONTAL_CALIBRATION_PITCH > 1){
+			pitch_power = 30;
+		}
+		else if(m_AttitudeData.pitch + HORIZONTAL_CALIBRATION_PITCH < -1){
+			pitch_power = -30;
+		}
+		else{
+			pitch_power = 0;
+
+		}
+		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_PITCH		, BETAFPV_F4_2S_AIO_NEUTRAL + pitch_power);
+
+
 		//高度制御イベント値
 		altitude_event = Get_Altitude_Ctrl_Event(VL53L0X_Measurement[4],save_altitude);	
 		Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
