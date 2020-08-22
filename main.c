@@ -345,13 +345,15 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 
 
-		printf("Power %d time %0.2lf VL53L0X: %4d roll_power %4d pitch_power %4d MPU6050(yaw,roll,pitch) %4.2lf %4.2lf %4.2lf\n", 
+		printf("Power %d time %0.2lf VL53L0X: %4d roll_power %4d pitch_power %4d MPU6050(yaw,roll,pitch) %4.2lf %4.2lf %4.2lf event %2d status %2d\n", 
 				altitude_power, 
 				dfFlightTime, 
 				VL53L0X_Measurement[4],
 				roll_power,
 				pitch_power,
-				m_AttitudeData.yaw,m_AttitudeData.roll,m_AttitudeData.pitch);
+				m_AttitudeData.yaw,m_AttitudeData.roll,m_AttitudeData.pitch,
+				altitude_event,
+				altitude_status);
 
 	}	//for()
 
