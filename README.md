@@ -11,8 +11,8 @@ Raspberry Pi Zero で自律飛行ドローン作成
 | ---- | ---- | ---- | ---- | ---- | ---- |
 |  1 <br>開始 |  TAKEOFF_POWER<br>status=2  | | | | |
 |  2 <br> N/A |    | ||| |
-|  3 <br>現在高度は最大値超え |    | LANDING_POWER<br>status=3|
-|  4 <br>下降検知 |   |power+10 |TAKEOFF_POWER<br>status=4|設定高度未満の場合、TAKEOFF_POWER<br>status=2|
+|  3 <br>現在高度は最大値超え |    | LANDING_POWER<br>status=3| |LANDING_POWER<br>status=3|
+|  4 <br>下降検知 |   |power+10 |power+10<br>status=4|設定高度未満の場合はTAKEOFF_POWER(TAKEOFF_POWER < powerの場合)<br>status=2<br><br>そうでない場合はpower+10|
 |  5 <br>ランディング |    |LANDING_POWER<br>status=5 |LANDING_POWER<br>status=5 |LANDING_POWER<br>status=5 |
 
 ### 姿勢制御方法
