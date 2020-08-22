@@ -85,6 +85,26 @@ https://qiita.com/shigeru-yokochi/items/f996d495effdf6dea3fc
 - 前後(左右)両方の距離が閾値を超えている場合はエラーとする（今回は何も処理しない）
 - 逆方向へ移動する出力は固定とする（とりあえず）
 
+### 姿勢制御方法
+
+未実装
+
+### PID制御
+
+未実装
+
+### BLE制御
+
+未実装
+
+### ジャイロ
+
+未実装
+
+### 気圧センサー
+
+フライトコントローラーに内蔵されているものを使用
+
 ---
 
 ## betafpv_VL53L0X_single branch (master -> betafpv -> betafpv_VL53L0X_single)
