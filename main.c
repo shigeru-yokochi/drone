@@ -262,7 +262,6 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 			PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 		}
 
-		save_altitude = VL53L0X_Measurement[4];												//前回の高度を保存
 		if(VL53L0X_GetMeasurements(&VL53L0X_Measurement[4],4) != VL53L0X_ERROR_NONE)break;	//VL53L0X測定値獲得 5 高度
 
 		//最大地上高で静止させる
@@ -335,9 +334,14 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 
 		//高度制御イベント値
-		altitude_event = Get_Altitude_Ctrl_Event(VL53L0X_Measurement[4],save_altitude);	
-		Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
-		//モータ出力(throttle)
+//		altitude_event = Get_Altitude_Ctrl_Event(VL53L0X_Measurement[4],save_altitude);	
+//		Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power);
+
+		altitude_event = Get_Altitude_Ctrl_Event(VL53L0X_Measurement[4],save_altitude); 
+		save_altitude = VL53L0X_Measurement[4];
+        Get_Altitude_Ctrl_Power(altitude_event,&altitude_status,&altitude_power,VL53L0X_Measurement[4]);
+
+		//throttle
 		PCA9685_pwmWrite(BETAFPV_F4_2S_AIO_THROTTLE, (double)(BETAFPV_F4_2S_AIO_NEUTRAL_THROTTLE + altitude_power));
 
 
@@ -416,8 +420,8 @@ static void Get_Horizontal_Level_Power(float val,int *correction_power)
 ********************************************************************************/
 static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save)
 {
-	//50mmを超えた下降検知
-	if(alt+50 < alt_save){
+	//10mmを超えた下降検知
+	if(alt+10 < alt_save){
 		return 4;
 	}
 	if(alt > MAXIMUM_GROUND_CLEARANCE){
@@ -428,56 +432,55 @@ static int Get_Altitude_Ctrl_Event(uint16_t alt,uint16_t alt_save)
 /********************************************************************************
 *	高度制御出力取得
 ********************************************************************************/
-static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power)
+static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power,int altitude)
 {
-	switch(*status){
-		case 1:
-			if(event == 1){
-				*correction_power = CLIMB_POWER;
-				*status = 2;
-			}
-			return true;
-		case 2:
-			if(event == 3){
-				*correction_power = LANDING_POWER;
-				*status = 3;
-			}
-			if(event == 4){
-				(*correction_power)+=20;
-			}
-			if(event == 5){
-				*correction_power = LANDING_POWER;
-				*status = 5;
-			}
-			return true;
-		case 3:
-			if(event == 2){
-				*correction_power = CLIMB_POWER;
-				*status = 2;
-			}
-			if(event == 4){
-				*correction_power = CLIMB_POWER;
-				*status = 4;
-			}
-			if(event == 5){
-				*correction_power = LANDING_POWER;
-				*status = 5;
-			}
-			return true;
-		case 4:
-			if(event == 2){
-				*status = 2;
-			}
-			if(event == 5){
-				*correction_power = LANDING_POWER;
-				*status = 5;
-			}
-			return true;
-		case 5:
-			return true;
-	}
-	printf("*** error Get_Altitude_Power() not status.[%d]\n",*status);
-	return false;
+    switch(*status){
+        case 1:
+            if(event == 1){
+                *correction_power = CLIMB_POWER;
+                *status = 2;
+            }
+            return true;
+        case 2:
+            if(event == 3){
+                *correction_power = LANDING_POWER;
+                *status = 3;
+            }
+            if(event == 4){
+                (*correction_power)+=10;
+            }
+            if(event == 5){
+                *correction_power = LANDING_POWER;
+                *status = 5;
+            }
+            return true;
+        case 3:
+            if(event == 4){
+                *correction_power = CLIMB_POWER;
+                *status = 4;
+            }
+            if(event == 5){
+                *correction_power = LANDING_POWER;
+                *status = 5;
+            }
+            return true;
+        case 4:
+            if(event == 4){
+				if(altitude < MAXIMUM_GROUND_CLEARANCE){
+	               	*correction_power = CLIMB_POWER;
+    	            *status = 2;
+				}
+            }
+            if(event == 5){
+                *correction_power = LANDING_POWER;
+                *status = 5;
+            }
+            return true;
+        case 5:
+            return true;
+    }
+    printf("*** error Get_Altitude_Power() not status.[%d]\n",*status);
+    return false;
 }
 
 /*****************************************************************
