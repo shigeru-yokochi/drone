@@ -120,10 +120,10 @@ static FILE *m_fp,*m_fpVL53L0X;
 
 #define DEBUG_MAINLOOP_TO			5	//デバッグ用メインループタイムアウト指定(sec)
 #define FLIGHT_TIME					4	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
-#define CLIMB_POWER 				500
-#define LANDING_POWER 				400
-//#define CLIMB_POWER 				50	//飛ばないテスト用
-//#define LANDING_POWER 			30
+//#define CLIMB_POWER 				500
+//#define LANDING_POWER 				400
+#define CLIMB_POWER 				50	//飛ばないテスト用
+#define LANDING_POWER 			30
 
 
 //姿勢制御用データ格納用
@@ -322,10 +322,10 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 		//姿勢制御(pitch test中)
 		if(m_AttitudeData.pitch + HORIZONTAL_CALIBRATION_PITCH > 1){
-			pitch_power = 30;
+			pitch_power = 50;
 		}
 		else if(m_AttitudeData.pitch + HORIZONTAL_CALIBRATION_PITCH < -1){
-			pitch_power = -30;
+			pitch_power = -50;
 		}
 		else{
 			pitch_power = 0;
