@@ -62,7 +62,7 @@ https://qiita.com/shigeru-yokochi/items/f996d495effdf6dea3fc
 [![youtube movie](http://i.ytimg.com/vi/JrEqpENNYcE/hqdefault.jpg)](https://www.youtube.com/watch?v=JrEqpENNYcE)
 
 
-## 高度を維持する方法
+### 高度を維持する方法
 
 以下の状態とイベントに分けて処理します
 
@@ -74,7 +74,7 @@ https://qiita.com/shigeru-yokochi/items/f996d495effdf6dea3fc
 |  4 <br>下降検知 |   |power+10 |TAKEOFF_POWER<br>status=4|設定高度未満の場合、TAKEOFF_POWER<br>status=2|
 |  5 <br>ランディング |    |LANDING_POWER<br>status=5 |LANDING_POWER<br>status=5 |LANDING_POWER<br>status=5 |
 
-## 前後左右に衝突しない方法
+### 前後左右に衝突しない方法
 
 - 前後(左右)の距離を測り閾値を超えたら逆方向へ移動する
 - 前後(左右)両方の距離が閾値を超えている場合はエラーとする（今回は何も処理しない）
