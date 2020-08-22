@@ -308,10 +308,10 @@ static void BETAFPV_F4_2S_AIO_Main_Loop(void)
 
 
 		//姿勢制御(roll test中)
-		if(m_AttitudeData.roll + HORIZONTAL_CALIBRATION_ROLL > 3){
+		if(m_AttitudeData.roll + HORIZONTAL_CALIBRATION_ROLL > 2){
 			roll_power = 10;
 		}
-		else if(m_AttitudeData.roll + HORIZONTAL_CALIBRATION_ROLL < -3){
+		else if(m_AttitudeData.roll + HORIZONTAL_CALIBRATION_ROLL < -2){
 			roll_power = -10;
 		}
 		else{
