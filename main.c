@@ -449,7 +449,7 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power,
                 *status = 3;
             }
             if(event == 4){
-                (*correction_power)+=10;
+                (*correction_power)+=20;
             }
             if(event == 5){
                 *correction_power = LANDING_POWER;
@@ -459,7 +459,7 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power,
         case 3:
             if(event == 4){
 //                *correction_power = CLIMB_POWER;
-                (*correction_power)+=10;
+                (*correction_power)+=20;
                 *status = 4;
             }
             if(event == 5){
@@ -480,7 +480,7 @@ static bool Get_Altitude_Ctrl_Power(int event,int *status,int *correction_power,
     	            *status = 2;
 				}
 				else{
-	                (*correction_power)+=10;
+	                (*correction_power)+=20;
 				}
             }
             if(event == 5){
