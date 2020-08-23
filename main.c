@@ -120,8 +120,8 @@ static FILE *m_fp,*m_fpVL53L0X;
 
 #define DEBUG_MAINLOOP_TO			5	//デバッグ用メインループタイムアウト指定(sec)
 #define FLIGHT_TIME					4	//DEBUG_MAINLOOP_TO - FLIGHT_TIME = landing time
-//#define CLIMB_POWER 				550
-//#define LANDING_POWER 				450
+#define CLIMB_POWER 				550
+#define LANDING_POWER 				450
 #define CLIMB_POWER 				50	//飛ばないテスト用
 #define LANDING_POWER 			30
 
