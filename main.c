@@ -148,19 +148,6 @@ static struct_AttitudeData m_AttitudeData;
 ********************************************************************************/
 int main(int argc, char **argv)
 {
-//debug-------------
-//	int i, nHeadPower[4];
-//	for (i = 0; i < 360; i++) {
-//		memset(nHeadPower, 0, sizeof(nHeadPower));
-//		HeadNorth(i, &nHeadPower[0], &nHeadPower[1], &nHeadPower[2], &nHeadPower[3]);//北に向かう
-//		printf("%03d:%03d %03d %03d %03d (%d)(%d)(%d)(%d)\n", i, nHeadPower[0], nHeadPower[1], nHeadPower[2], nHeadPower[3],
-//			nHeadPower[0] + nHeadPower[2],
-//			nHeadPower[2] + nHeadPower[1],
-//			nHeadPower[1] + nHeadPower[3],
-//			nHeadPower[3] + nHeadPower[0]);
-//	}
-//	return 0;
-//---------debug
 	if(wiringPiSetupGpio() == -1){
         printf("wiringPiSetupGpio() error\n");
         return -1;
@@ -329,13 +316,13 @@ static void Naze32_Main_Loop(void)
 
 
 		//ジャイロ/加速度
-		MPU6050_GetMeasurements(&m_AttitudeData.yaw,
-								&m_AttitudeData.pitch,
-								&m_AttitudeData.roll,
-								&m_AttitudeData.aax,
-								&m_AttitudeData.aay,
-								&m_AttitudeData.aaz,
-								m_fp);//MPU6050測定値獲得
+//		MPU6050_GetMeasurements(&m_AttitudeData.yaw,
+//								&m_AttitudeData.pitch,
+//								&m_AttitudeData.roll,
+//								&m_AttitudeData.aax,
+//								&m_AttitudeData.aay,
+//								&m_AttitudeData.aaz,
+//								m_fp);//MPU6050測定値獲得
 
 																				
 
@@ -853,12 +840,12 @@ static int I2c_device_init(void)
 	printf("--- VL53L0X_init() OK\n");
 
 
-	if(MPU6050_init() != 0){						//ジャイロ加速度センサ
-		printf("*** MPU6050_init()err\n");
-		VL53L0X_close(0);
-		return -1;
-	}
-	printf("--- MPU6050_init() OK\n");
+//	if(MPU6050_init() != 0){						//ジャイロ加速度センサ
+//		printf("*** MPU6050_init()err\n");
+//		VL53L0X_close(0);
+//		return -1;
+//	}
+//	printf("--- MPU6050_init() OK\n");
 
 	if(PCA9685_init() != 0){					//PWMドライバ
 		printf("*** PCA9685_init()err\n");
